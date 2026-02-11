@@ -65,7 +65,7 @@ jobs:
       version: ${{ steps.get_next_version.outputs.version }}
       hasNextVersion: ${{ steps.get_next_version.outputs.hasNextVersion }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         lfs: true
         fetch-depth: 0
@@ -86,7 +86,7 @@ jobs:
       content: ${{steps.git-cliff.outputs.content}}
       release_body: ${{ steps.git-cliff-changes.outputs.content }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           lfs: true
           fetch-depth: 0
