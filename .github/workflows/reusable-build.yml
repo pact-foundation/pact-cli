@@ -47,7 +47,7 @@ jobs:
         if: ${{ inputs.use-cross != true && env.SLIM == 'true' }}
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.8'
+          ruby-version: '4.0.1'
           bundler-cache: true
         if: ${{ inputs.target != 'x86_64-apple-darwin' && inputs.target != 'aarch64-apple-darwin' }}
       - name: Install Rust Toolchain Components
