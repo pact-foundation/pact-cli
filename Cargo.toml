@@ -72,7 +72,7 @@ panic = "unwind"
 # https://github.com/cross-rs/cross/issues/1363#issuecomment-1783917450
 
 [target.'cfg(target_os = "freebsd")'.dependencies]
-indexmap = { version = "1.9.3", features = ["std"] }
+indexmap = { version = "2.0.0", features = ["std"] }
 # requires std feature for detection with cross for aarch64-unknown-freebsd target
 # https://github.com/tower-rs/tower/issues/466
 # https://github.com/indexmap-rs/indexmap/pull/145
