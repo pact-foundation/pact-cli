@@ -2286,7 +2286,7 @@ dependencies = [
  "bytes",
  "http",
  "opentelemetry 0.31.0",
- "reqwest",
+ "reqwest 0.12.24",
 ]
 
 [[package]]
@@ -2301,7 +2301,7 @@ dependencies = [
  "opentelemetry-proto",
  "opentelemetry_sdk 0.31.0",
  "prost 0.14.1",
- "reqwest",
+ "reqwest 0.12.24",
  "thiserror 2.0.17",
  "tokio",
  "tonic 0.14.2",
@@ -2387,7 +2387,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.48.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2411,8 +2411,8 @@ dependencies = [
  "pact-stub-server",
  "pact_mock_server_cli",
  "pact_verifier_cli",
- "reqwest",
- "reqwest-tracing",
+ "reqwest 0.12.24",
+ "reqwest-tracing 0.7.0",
  "serde",
  "serde_json",
  "tokio",
@@ -2451,9 +2451,9 @@ dependencies = [
  "opentelemetry_sdk 0.31.0",
  "pact_models",
  "regex",
- "reqwest",
- "reqwest-middleware",
- "reqwest-tracing",
+ "reqwest 0.12.24",
+ "reqwest-middleware 0.4.2",
+ "reqwest-tracing 0.5.8",
  "serde",
  "serde_json",
  "serde_with",
@@ -2485,7 +2485,7 @@ dependencies = [
  "pact-plugin-driver",
  "parse-zoneinfo",
  "requestty",
- "reqwest",
+ "reqwest 0.12.24",
  "serde",
  "serde_json",
  "tokio",
@@ -2520,7 +2520,7 @@ dependencies = [
  "prost 0.13.5",
  "prost-types",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "semver",
  "serde",
  "serde_json",
@@ -2562,7 +2562,7 @@ dependencies = [
  "pact_models",
  "pact_verifier",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "serde",
  "serde_json",
  "tokio",
@@ -2604,7 +2604,7 @@ dependencies = [
  "pact_models",
  "rand 0.9.2",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "semver",
  "serde",
  "serde_json",
@@ -2673,7 +2673,7 @@ dependencies = [
  "pact_models",
  "rand 0.9.2",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "rustls",
  "serde_json",
  "tokio",
@@ -2717,7 +2717,7 @@ dependencies = [
  "rand_regex",
  "regex",
  "regex-syntax",
- "reqwest",
+ "reqwest 0.12.24",
  "semver",
  "serde",
  "serde_json",
@@ -2750,7 +2750,7 @@ dependencies = [
  "pact_matching",
  "pact_models",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "serde",
  "serde_json",
  "serde_with",
@@ -2779,7 +2779,7 @@ dependencies = [
  "pact_models",
  "pact_verifier",
  "regex",
- "reqwest",
+ "reqwest 0.12.24",
  "serde_json",
  "strip-ansi-escapes",
  "tempfile",
@@ -3029,7 +3029,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
 dependencies = [
  "heck",
- "itertools 0.10.5",
+ "itertools 0.14.0",
  "log",
  "multimap",
  "once_cell",
@@ -3049,7 +3049,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a56d757972c98b346a9b766e3f02746cde6dd1cd1d1d563472929fdd74bec4d"
 dependencies = [
  "anyhow",
- "itertools 0.10.5",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.108",
@@ -3062,7 +3062,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9120690fafc389a67ba3803df527d0ec9cbbc9cc45e4cc20b332996dfb672425"
 dependencies = [
  "anyhow",
- "itertools 0.10.5",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.108",
@@ -3401,6 +3401,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "reqwest"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab3f43e3283ab1488b624b44b0e988d0acea0b3214e694730a055cb6b2efa801"
+dependencies = [
+ "base64",
+ "bytes",
+ "futures-core",
+ "http",
+ "http-body",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "js-sys",
+ "log",
+ "percent-encoding",
+ "pin-project-lite",
+ "sync_wrapper",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower-service",
+ "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "reqwest-middleware"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3409,9 +3438,23 @@ dependencies = [
  "anyhow",
  "async-trait",
  "http",
- "reqwest",
+ "reqwest 0.12.24",
  "serde",
  "thiserror 1.0.69",
+ "tower-service",
+]
+
+[[package]]
+name = "reqwest-middleware"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "199dda04a536b532d0cc04d7979e39b1c763ea749bf91507017069c00b96056f"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "http",
+ "reqwest 0.13.2",
+ "thiserror 2.0.17",
  "tower-service",
 ]
 
@@ -3427,8 +3470,26 @@ dependencies = [
  "http",
  "matchit",
  "opentelemetry 0.30.0",
- "reqwest",
- "reqwest-middleware",
+ "reqwest 0.12.24",
+ "reqwest-middleware 0.4.2",
+ "tracing",
+ "tracing-opentelemetry 0.31.0",
+]
+
+[[package]]
+name = "reqwest-tracing"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d5c1a1510677d43dce9e9c0c07fc5db8772c0e5a43e4f9cef75a11affa05a578"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "getrandom 0.2.16",
+ "http",
+ "matchit",
+ "opentelemetry 0.30.0",
+ "reqwest 0.13.2",
+ "reqwest-middleware 0.5.1",
  "tracing",
  "tracing-opentelemetry 0.31.0",
 ]
@@ -4444,9 +4505,9 @@ dependencies = [
 
 [[package]]
 name = "tower-http"
-version = "0.6.6"
+version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adc82fd73de2a9722ac5da747f12383d2bfdb93591ee6c58486e0097890f05f2"
+checksum = "d4e6559d53cc268e5031cd8429d05415bc4cb4aefc4aa5d6cc35fbf5b924a1f8"
 dependencies = [
  "async-compression",
  "base64",
@@ -4955,7 +5016,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.48.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
