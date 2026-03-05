@@ -20,6 +20,7 @@ pub struct ExtensionConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ExtensionType {
+    Drift,
     PactflowAi,
     PactRubyStandalone,
     External,
@@ -90,6 +91,25 @@ impl PlatformInfo {
         format!(
             "https://download.pactflow.io/ai/dist/{}/{}/pactflow-ai",
             target, version
+        )
+    }
+    pub fn get_drift_url(&self) -> String {
+        format!("https://download.pactflow.io/drift/version.txt")
+    }
+    pub fn get_drift_download_url(&self, version: &str) -> String {
+        let target = match (self.os.as_str(), self.arch.as_str()) {
+            ("darwin", "aarch64") => "macos-aarch64",
+            ("darwin", "x86_64") => "macos-x86_64",
+            ("windows", "aarch64") => "windows-aarch64",
+            ("windows", "x86_64") => "windows-x86_64",
+            ("linux", "aarch64") => "linux-aarch64",
+            ("linux", "x86_64") => "linux-x86_64",
+            _ => "linux-x86_64", // fallback
+        };
+
+        format!(
+            "https://download.pactflow.io/drift/{}/{}.tgz",
+            version, target
         )
     }
 
@@ -168,6 +188,7 @@ impl ExtensionManager {
 
         // Add built-in extensions if not present
         let builtin_extensions = [
+            ("drift", ExtensionType::Drift),
             ("pactflow-ai", ExtensionType::PactflowAi),
             ("pact-broker-legacy", ExtensionType::PactRubyStandalone),
             ("pactflow-legacy", ExtensionType::PactRubyStandalone),
@@ -223,7 +244,9 @@ impl ExtensionManager {
             self.get_latest_pactflow_ai_version().await?
         };
 
-        let url = self.platform.get_pactflow_ai_download_url(&version);
+        let url = self
+            .platform
+            .get_pactflow_ai_download_url(&version.replace("+", "%2b"));
 
         println!("🚀 Downloading pactflow-ai from {}", url);
 
@@ -272,6 +295,73 @@ impl ExtensionManager {
         println!("✅ Successfully installed pactflow-ai");
         Ok(())
     }
+    pub async fn install_drift(
+        &self,
+        version: Option<&str>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        if !self.platform.is_supported() {
+            return Err(format!(
+                "Unsupported platform: {}-{}",
+                self.platform.os, self.platform.arch
+            )
+            .into());
+        }
+
+        self.ensure_extensions_dir()?;
+
+        let version = if let Some(v) = version {
+            v.to_string()
+        } else {
+            self.get_latest_drift_version().await?
+        };
+
+        let url = self.platform.get_drift_download_url(&version);
+
+        println!("🚀 Downloading drift from {}", url);
+
+        let response = reqwest::get(&url).await?;
+        if !response.status().is_success() {
+            return Err(format!("Failed to download drift: HTTP {}", response.status()).into());
+        }
+
+        let body = response.bytes().await?;
+        // let bin_dir = format!("{}/bin", self.extensions_home);
+        let archive_path = format!("{}/drift.{}", self.extensions_home, "tar.gz");
+        let mut file = fs::File::create(&archive_path)?;
+        file.write_all(&body)?;
+        drop(file);
+
+        // Extract archive
+        println!("🚀 Extracting drift...");
+        self.extract_drift_archive(&archive_path)?;
+
+        // Get the binary path from the extracted archive
+        let binary_dir = format!(
+            "{}/drift",
+            self.extensions_home,
+            // self.platform.get_executable_extension()
+        );
+
+        // Clean up archive
+        fs::remove_file(&archive_path)?;
+
+        // Update config
+        let mut config = self.load_config();
+        config.insert(
+            "drift".to_string(),
+            ExtensionConfig {
+                name: "drift".to_string(),
+                version: version.to_string(),
+                binary_path: binary_dir,
+                extension_type: ExtensionType::Drift,
+                installed: true,
+            },
+        );
+        self.save_config(&config)?;
+
+        println!("✅ Successfully installed drift");
+        Ok(())
+    }
 
     pub async fn install_ruby_legacy(
         &self,
@@ -306,18 +396,13 @@ impl ExtensionManager {
 
         let response = reqwest::get(&url).await?;
         if !response.status().is_success() {
-            return Err(format!(
-                "Failed to download pact-legacy: HTTP {}",
-                response.status()
-            )
-            .into());
+            return Err(
+                format!("Failed to download pact-legacy: HTTP {}", response.status()).into(),
+            );
         }
 
         let body = response.bytes().await?;
-        let archive_path = format!(
-            "{}/pact-legacy.{}",
-            self.extensions_home, archive_ext
-        );
+        let archive_path = format!("{}/pact-legacy.{}", self.extensions_home, archive_ext);
         let mut file = fs::File::create(&archive_path)?;
         file.write_all(&body)?;
         drop(file);
@@ -379,8 +464,51 @@ impl ExtensionManager {
 
                 if output.status.success() {
                     let version_output = String::from_utf8_lossy(&output.stdout);
-                    // Parse version from output like "pactflow-ai 1.11.4"
+                    // Parse version from output like "pactflow-ai 2.0.10 (ae6a94e1 2026-03-03)"
                     if let Some(version) = version_output.split_whitespace().nth(1) {
+                        if let Some(commit) = version_output.split_whitespace().nth(2) {
+                            let commit = commit.trim_start_matches('(').trim_end_matches(')');
+                            return Ok(format!("{}+{}", version, commit));
+                        }
+                        return Ok(version.to_string());
+                    }
+                }
+            }
+        }
+        Ok("unknown".to_string())
+    }
+    async fn get_latest_drift_version(&self) -> Result<String, Box<dyn std::error::Error>> {
+        let url = self.platform.get_drift_url();
+        let client = reqwest::Client::new();
+        let response = client
+            .get(&url)
+            .header("User-Agent", "pact-cli")
+            .send()
+            .await?;
+
+        let text: String = response.text().await?;
+        // The API returns just the version number like "1.11.4"
+        Ok(text.trim().to_string())
+    }
+
+    fn get_installed_drift_version(&self) -> Result<String, Box<dyn std::error::Error>> {
+        let config = self.load_config();
+        if let Some(ext_config) = config.get("drift") {
+            let drift_executable_path = format!(
+                "{}/drift{}",
+                &ext_config.binary_path,
+                self.platform.get_executable_extension()
+            );
+
+            println!("{drift_executable_path}");
+            if ext_config.installed && Path::new(&drift_executable_path).exists() {
+                let output = Cmd::new(drift_executable_path).arg("--version").output()?;
+
+                if output.status.success() {
+                    let version_output = String::from_utf8_lossy(&output.stdout);
+                    println!("{version_output}");
+                    // Parse version from output like "Drift testing tools 2603.0.1-beta"
+                    if let Some(version) = version_output.split_whitespace().nth(3) {
                         return Ok(version.to_string());
                     }
                 }
@@ -418,6 +546,78 @@ impl ExtensionManager {
 
             if !status.success() {
                 return Err("Failed to extract tar archive".into());
+            }
+        }
+
+        Ok(())
+    }
+    fn extract_drift_archive(&self, archive_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let extract_dir = format!("{}/drift", self.extensions_home);
+        fs::create_dir_all(&extract_dir)?;
+
+        if self.platform.os == "windows" {
+            // Use PowerShell for Windows
+            let status = Cmd::new("powershell")
+                .arg("-Command")
+                .arg(format!(
+                    "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
+                    archive_path, extract_dir
+                ))
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract Windows archive".into());
+            }
+        } else {
+            // Use tar for Unix systems
+            let status = Cmd::new("tar")
+                .arg("-xzf")
+                .arg(archive_path)
+                .arg("-C")
+                .arg(&extract_dir)
+                // .arg("--strip-components=1")
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract tar archive".into());
+            }
+        }
+
+        // Create symlinks for drift binaries to the bin folder
+        let bin_dir = format!("{}/../bin", self.extensions_home);
+        fs::create_dir_all(&bin_dir)?;
+
+        let drift_bin_dir = format!("{}/drift", self.extensions_home);
+        let exe_ext = self.platform.get_executable_extension();
+
+        let drift_binaries = [
+            "drift",
+            "drift-check-version",
+            "drift-plugins",
+            "drift-repl",
+            "drift-verifier",
+            "drift-versions",
+        ];
+
+        for binary_name in drift_binaries {
+            let source_path = format!("{}/{}{}", drift_bin_dir, binary_name, exe_ext);
+            let target_path = format!("{}/{}{}", bin_dir, binary_name, exe_ext);
+
+            if Path::new(&source_path).exists() {
+                #[cfg(unix)]
+                {
+                    if Path::new(&target_path).exists() {
+                        fs::remove_file(&target_path)?;
+                    }
+                    std::os::unix::fs::symlink(&source_path, &target_path)?;
+                }
+
+                #[cfg(windows)]
+                {
+                    fs::copy(&source_path, &target_path)?;
+                }
+
+                println!("📋 Created drift binary symlink: {}", binary_name);
             }
         }
 
@@ -520,7 +720,17 @@ impl ExtensionManager {
                 .into());
             }
 
-            let status = Cmd::new(&ext_config.binary_path).args(args).status()?;
+            let binary_path = if extension_name == "drift" {
+                format!(
+                    "{}/drift{}",
+                    ext_config.binary_path,
+                    self.platform.get_executable_extension()
+                )
+            } else {
+                ext_config.binary_path.clone()
+            };
+
+            let status = Cmd::new(binary_path).args(args).status()?;
 
             Ok(status)
         } else {
@@ -581,12 +791,37 @@ impl ExtensionManager {
         } else if let Some(ext_config) = config.get(extension_name) {
             println!("🗑️  Uninstalling extension: {}", extension_name);
 
+            // Remove drift symlinks/binaries from bin folder if uninstalling drift
+            if extension_name == "drift" {
+                let bin_dir = format!("{}/../bin", self.extensions_home);
+                let exe_ext = self.platform.get_executable_extension();
+
+                let drift_binaries = [
+                    "drift",
+                    "drift-check-version",
+                    "drift-plugins",
+                    "drift-repl",
+                    "drift-verifier",
+                    "drift-versions",
+                ];
+
+                for binary_name in drift_binaries {
+                    let binary_path = format!("{}/{}{}", bin_dir, binary_name, exe_ext);
+                    println!("🗑️  Removing drift binary: {}", binary_path);
+
+                    if Path::new(&binary_path).exists() {
+                        fs::remove_file(&binary_path)?;
+                        println!("🗑️  Removed drift binary: {}", binary_name);
+                    }
+                }
+            }
+
             if Path::new(&ext_config.binary_path).exists() {
-                if ext_config.binary_path.ends_with("/pact-legacy") {
-                    // This is a directory, remove it
+                if ext_config.binary_path.ends_with("/pact-legacy")
+                    || ext_config.binary_path.ends_with("/drift")
+                {
                     fs::remove_dir_all(&ext_config.binary_path)?;
                 } else {
-                    // This is a file, remove it
                     fs::remove_file(&ext_config.binary_path)?;
                 }
             }
@@ -624,7 +859,7 @@ pub fn add_extension_subcommand() -> Command {
                     Arg::new("extension")
                         .help("Extension name to install")
                         .required(false)
-                        .value_parser(["pactflow-ai", "pact-legacy"]),
+                        .value_parser(["pactflow-ai", "pact-legacy", "drift"]),
                 )
                 .arg(
                     Arg::new("all")
@@ -681,66 +916,78 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
 
             // Fetch latest versions from APIs
             let latest_ruby_version = match manager.get_latest_ruby_standalone_version().await {
-            Ok(v) => v,
-            Err(_) => "unknown".to_string(),
+                Ok(v) => v,
+                Err(_) => "unknown".to_string(),
             };
             let latest_pactflow_ai_version = match manager.get_latest_pactflow_ai_version().await {
-            Ok(v) => v,
-            Err(_) => "unknown".to_string(),
+                Ok(v) => v,
+                Err(_) => "unknown".to_string(),
+            };
+            let latest_drift_version = match manager.get_latest_drift_version().await {
+                Ok(v) => v,
+                Err(_) => "unknown".to_string(),
             };
 
             println!("📦 Available extensions:");
-            
+
             let mut table = comfy_table::Table::new();
             table
-            .set_header(vec!["Name", "Type", "Installed", "Latest", "Status"])
-            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+                .set_header(vec!["Name", "Type", "Installed", "Latest", "Status"])
+                .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
 
             for (name, config) in extensions {
-            if installed_only && !config.installed {
-                continue;
-            }
-
-            let ext_type = match config.extension_type {
-                ExtensionType::PactflowAi => "PactFlow AI",
-                ExtensionType::PactRubyStandalone => "Pact Legacy",
-                ExtensionType::External => "External",
-            };
-
-            let status = if config.installed {
-                "✅ Installed"
-            } else {
-                "❌ Not Installed"
-            };
-            let installed_version = if config.installed {
-                if matches!(config.extension_type, ExtensionType::PactflowAi) {
-                match manager.get_installed_pactflow_ai_version() {
-                    Ok(v) => v,
-                    Err(_) => "unknown".to_string(),
+                if installed_only && !config.installed {
+                    continue;
                 }
-                } else {
-                config.version.clone()
-                }
-            } else {
-                "-".to_string()
-            };
 
-            let latest_version =
-                if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
-                latest_ruby_version.clone()
-                } else if matches!(config.extension_type, ExtensionType::PactflowAi) {
-                latest_pactflow_ai_version.clone()
-                } else {
-                "-".to_string()
+                let ext_type = match config.extension_type {
+                    ExtensionType::Drift => "Drift",
+                    ExtensionType::PactflowAi => "PactFlow AI",
+                    ExtensionType::PactRubyStandalone => "Pact Legacy",
+                    ExtensionType::External => "External",
                 };
 
-            table.add_row(vec![
-                name,
-                ext_type.to_string(),
-                installed_version,
-                latest_version,
-                status.to_string(),
-            ]);
+                let status = if config.installed {
+                    "✅ Installed"
+                } else {
+                    "❌ Not Installed"
+                };
+                let installed_version = if config.installed {
+                    if matches!(config.extension_type, ExtensionType::PactflowAi) {
+                        match manager.get_installed_pactflow_ai_version() {
+                            Ok(v) => v,
+                            Err(_) => "unknown".to_string(),
+                        }
+                    } else if matches!(config.extension_type, ExtensionType::Drift) {
+                        match manager.get_installed_drift_version() {
+                            Ok(v) => v,
+                            Err(_) => "unknown".to_string(),
+                        }
+                    } else {
+                        config.version.clone()
+                    }
+                } else {
+                    "-".to_string()
+                };
+
+                let latest_version =
+                    if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
+                        latest_ruby_version.clone()
+                    } else if matches!(config.extension_type, ExtensionType::PactflowAi) {
+                        latest_pactflow_ai_version.clone()
+                    } else if matches!(config.extension_type, ExtensionType::Drift) {
+                        latest_drift_version.clone()
+                    } else {
+                        "-".to_string()
+                    };
+
+                table.add_row(vec![
+                    name,
+                    ext_type.to_string(),
+                    installed_version,
+                    latest_version,
+                    status.to_string(),
+                ]);
             }
 
             println!("{}", table);
@@ -754,6 +1001,7 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
                 println!("🚀 Installing all available extensions...");
                 manager.install_pactflow_ai(version).await?;
                 manager.install_ruby_legacy(version).await?;
+                manager.install_drift(version).await?;
             } else if let Some(ext_name) = extension {
                 match ext_name.as_str() {
                     "pactflow-ai" => {
@@ -761,6 +1009,9 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
                     }
                     "pact-legacy" => {
                         manager.install_ruby_legacy(version).await?;
+                    }
+                    "drift" => {
+                        manager.install_drift(version).await?;
                     }
                     _ => {
                         return Err(format!("Unknown extension: {}", ext_name).into());
@@ -792,6 +1043,9 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
                         ExtensionType::PactflowAi => {
                             manager.install_pactflow_ai(None).await?;
                         }
+                        ExtensionType::Drift => {
+                            manager.install_drift(None).await?;
+                        }
                         ExtensionType::PactRubyStandalone => {
                             manager.install_ruby_legacy(None).await?;
                         }
@@ -808,6 +1062,9 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
                         match config.extension_type {
                             ExtensionType::PactflowAi => {
                                 manager.install_pactflow_ai(None).await?;
+                            }
+                            ExtensionType::Drift => {
+                                manager.install_drift(None).await?;
                             }
                             ExtensionType::PactRubyStandalone => {
                                 manager.install_ruby_legacy(None).await?;
@@ -831,41 +1088,41 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
             let all = sub_args.get_flag("all");
 
             if all {
-            let extensions = manager.list_extensions();
-            let mut installed_extensions: Vec<_> = extensions
-                .iter()
-                .filter(|(_, config)| config.installed)
-                .map(|(name, config)| (name.clone(), config.clone()))
-                .collect();
+                let extensions = manager.list_extensions();
+                let mut installed_extensions: Vec<_> = extensions
+                    .iter()
+                    .filter(|(_, config)| config.installed)
+                    .map(|(name, config)| (name.clone(), config.clone()))
+                    .collect();
 
-            // For PactRubyStandalone extensions, only keep the master entry
-            let mut ruby_found = false;
-            installed_extensions.retain(|(name, config)| {
-                if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
-                if !ruby_found && name == "pact-legacy" {
-                    ruby_found = true;
-                    true
-                } else {
-                    false
+                // For PactRubyStandalone extensions, only keep the master entry
+                let mut ruby_found = false;
+                installed_extensions.retain(|(name, config)| {
+                    if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
+                        if !ruby_found && name == "pact-legacy" {
+                            ruby_found = true;
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        true
+                    }
+                });
+
+                if installed_extensions.is_empty() {
+                    println!("⚠️  No extensions are currently installed.");
+                    return Ok(());
                 }
-                } else {
-                true
+
+                println!("🗑️  Uninstalling all extensions...");
+                for (ext_name, _) in installed_extensions {
+                    manager.uninstall_extension(&ext_name)?;
                 }
-            });
-
-            if installed_extensions.is_empty() {
-                println!("⚠️  No extensions are currently installed.");
-                return Ok(());
-            }
-
-            println!("🗑️  Uninstalling all extensions...");
-            for (ext_name, _) in installed_extensions {
-                manager.uninstall_extension(&ext_name)?;
-            }
             } else if let Some(ext_name) = extension {
-            manager.uninstall_extension(ext_name)?;
+                manager.uninstall_extension(ext_name)?;
             } else {
-            return Err("Please specify an extension name or use --all flag".into());
+                return Err("Please specify an extension name or use --all flag".into());
             }
         }
         Some((external_cmd, _)) => {

@@ -33,6 +33,16 @@ pact extension pact-broker-legacy --help
 - **Features**: AI-augmented contract generation, reviews
 - **Platforms**: macOS (Intel/Apple Silicon), Linux (x64/ARM64), Windows (x64/ARM64)
 
+### Drift
+
+**Contract conformance testing — validate whether an API implementation matches its published specification.**
+
+- **Name**: `drift`
+- **Type**: Drift
+- **Usage**: `pact drift <args>` or `pact extension drift <args>`
+- **Features**: Contract conformance testing, API implementation validation
+- **Platforms**: macOS (Intel/Apple Silicon), Linux (x64/ARM64), Windows (x64)
+
 ### Ruby Legacy Tools
 
 **Traditional Ruby-based Pact tools (pact-legacy)**
