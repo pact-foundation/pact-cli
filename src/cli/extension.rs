@@ -145,6 +145,7 @@ impl PlatformInfo {
 
 pub struct ExtensionManager {
     pub extensions_home: String,
+    pub drift_home: String,
     pub platform: PlatformInfo,
 }
 
@@ -153,9 +154,11 @@ impl ExtensionManager {
         let home_dir = home::home_dir().unwrap_or_default();
         let extensions_home = env::var("PACT_CLI_EXTENSIONS_HOME")
             .unwrap_or_else(|_| home_dir.join(".pact/extensions").display().to_string());
+        let drift_home = home_dir.join(".drift").display().to_string();
 
         Self {
             extensions_home,
+            drift_home,
             platform: PlatformInfo::detect(),
         }
     }
@@ -307,7 +310,8 @@ impl ExtensionManager {
             .into());
         }
 
-        self.ensure_extensions_dir()?;
+        // Install to ~/.drift
+        fs::create_dir_all(&self.drift_home)?;
 
         let version = if let Some(v) = version {
             v.to_string()
@@ -325,41 +329,34 @@ impl ExtensionManager {
         }
 
         let body = response.bytes().await?;
-        // let bin_dir = format!("{}/bin", self.extensions_home);
-        let archive_path = format!("{}/drift.{}", self.extensions_home, "tar.gz");
+        let archive_path = format!("{}/drift.tar.gz", self.drift_home);
         let mut file = fs::File::create(&archive_path)?;
         file.write_all(&body)?;
         drop(file);
 
-        // Extract archive
+        // Extract archive to ~/.drift
         println!("🚀 Extracting drift...");
-        self.extract_drift_archive(&archive_path)?;
-
-        // Get the binary path from the extracted archive
-        let binary_dir = format!(
-            "{}/drift",
-            self.extensions_home,
-            // self.platform.get_executable_extension()
-        );
+        Self::extract_drift_archive_to(&archive_path, &self.drift_home, &self.platform)?;
 
         // Clean up archive
         fs::remove_file(&archive_path)?;
 
-        // Update config
+        // Update config - preserve existing extensions
         let mut config = self.load_config();
+        let drift_bin = format!("{}/drift", self.drift_home);
         config.insert(
             "drift".to_string(),
             ExtensionConfig {
                 name: "drift".to_string(),
                 version: version.to_string(),
-                binary_path: binary_dir,
+                binary_path: drift_bin.clone(),
                 extension_type: ExtensionType::Drift,
                 installed: true,
             },
         );
         self.save_config(&config)?;
 
-        println!("✅ Successfully installed drift");
+        println!("✅ Successfully installed drift to ~/.drift");
         Ok(())
     }
 
@@ -493,15 +490,15 @@ impl ExtensionManager {
 
     fn get_installed_drift_version(&self) -> Result<String, Box<dyn std::error::Error>> {
         let config = self.load_config();
-        if let Some(ext_config) = config.get("drift") {
+        if let Some(_ext_config) = config.get("drift") {
             let drift_executable_path = format!(
                 "{}/drift{}",
-                &ext_config.binary_path,
+                self.drift_home,
                 self.platform.get_executable_extension()
             );
 
             println!("{drift_executable_path}");
-            if ext_config.installed && Path::new(&drift_executable_path).exists() {
+            if Path::new(&drift_executable_path).exists() {
                 let output = Cmd::new(drift_executable_path).arg("--version").output()?;
 
                 if output.status.success() {
@@ -551,8 +548,46 @@ impl ExtensionManager {
 
         Ok(())
     }
+    /// Extracts drift archive to the specified directory (used for ~/.drift install)
+    fn extract_drift_archive_to(
+        archive_path: &str,
+        extract_dir: &str,
+        platform: &PlatformInfo,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        fs::create_dir_all(extract_dir)?;
+
+        if platform.os == "windows" {
+            // Use PowerShell for Windows
+            let status = Cmd::new("powershell")
+                .arg("-Command")
+                .arg(format!(
+                    "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
+                    archive_path, extract_dir
+                ))
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract Windows archive".into());
+            }
+        } else {
+            // Use tar for Unix systems
+            let status = Cmd::new("tar")
+                .arg("-xzf")
+                .arg(archive_path)
+                .arg("-C")
+                .arg(extract_dir)
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract tar archive".into());
+            }
+        }
+
+        Ok(())
+    }
+
     fn extract_drift_archive(&self, archive_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let extract_dir = format!("{}/drift", self.extensions_home);
+        let extract_dir = self.drift_home.clone();
         fs::create_dir_all(&extract_dir)?;
 
         if self.platform.os == "windows" {
@@ -575,7 +610,6 @@ impl ExtensionManager {
                 .arg(archive_path)
                 .arg("-C")
                 .arg(&extract_dir)
-                // .arg("--strip-components=1")
                 .status()?;
 
             if !status.success() {
@@ -583,44 +617,12 @@ impl ExtensionManager {
             }
         }
 
-        // Create symlinks for drift binaries to the bin folder
-        let bin_dir = format!("{}/../bin", self.extensions_home);
-        fs::create_dir_all(&bin_dir)?;
+        Ok(())
+    }
 
-        let drift_bin_dir = format!("{}/drift", self.extensions_home);
-        let exe_ext = self.platform.get_executable_extension();
-
-        let drift_binaries = [
-            "drift",
-            "drift-check-version",
-            "drift-plugins",
-            "drift-repl",
-            "drift-verifier",
-            "drift-versions",
-        ];
-
-        for binary_name in drift_binaries {
-            let source_path = format!("{}/{}{}", drift_bin_dir, binary_name, exe_ext);
-            let target_path = format!("{}/{}{}", bin_dir, binary_name, exe_ext);
-
-            if Path::new(&source_path).exists() {
-                #[cfg(unix)]
-                {
-                    if Path::new(&target_path).exists() {
-                        fs::remove_file(&target_path)?;
-                    }
-                    std::os::unix::fs::symlink(&source_path, &target_path)?;
-                }
-
-                #[cfg(windows)]
-                {
-                    fs::copy(&source_path, &target_path)?;
-                }
-
-                println!("📋 Created drift binary symlink: {}", binary_name);
-            }
-        }
-
+    fn extract_drift_archive_old(&self, _archive_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        // This function is kept for reference but not used
+        // Binaries are extracted directly without symlinks
         Ok(())
     }
 
@@ -723,7 +725,7 @@ impl ExtensionManager {
             let binary_path = if extension_name == "drift" {
                 format!(
                     "{}/drift{}",
-                    ext_config.binary_path,
+                    self.drift_home,
                     self.platform.get_executable_extension()
                 )
             } else {
@@ -788,42 +790,13 @@ impl ExtensionManager {
             self.save_config(&config)?;
 
             println!("✅ Successfully uninstalled pact-legacy and all legacy tools");
-        } else if let Some(ext_config) = config.get(extension_name) {
+        } else if let Some(_ext_config) = config.get(extension_name) {
             println!("🗑️  Uninstalling extension: {}", extension_name);
 
-            // Remove drift symlinks/binaries from bin folder if uninstalling drift
+            // Remove drift binary if uninstalling drift
             if extension_name == "drift" {
-                let bin_dir = format!("{}/../bin", self.extensions_home);
-                let exe_ext = self.platform.get_executable_extension();
-
-                let drift_binaries = [
-                    "drift",
-                    "drift-check-version",
-                    "drift-plugins",
-                    "drift-repl",
-                    "drift-verifier",
-                    "drift-versions",
-                ];
-
-                for binary_name in drift_binaries {
-                    let binary_path = format!("{}/{}{}", bin_dir, binary_name, exe_ext);
-                    println!("🗑️  Removing drift binary: {}", binary_path);
-
-                    if Path::new(&binary_path).exists() {
-                        fs::remove_file(&binary_path)?;
-                        println!("🗑️  Removed drift binary: {}", binary_name);
-                    }
-                }
-            }
-
-            if Path::new(&ext_config.binary_path).exists() {
-                if ext_config.binary_path.ends_with("/pact-legacy")
-                    || ext_config.binary_path.ends_with("/drift")
-                {
-                    fs::remove_dir_all(&ext_config.binary_path)?;
-                } else {
-                    fs::remove_file(&ext_config.binary_path)?;
-                }
+                fs::remove_dir_all(&self.drift_home)?;
+                println!("🗑️  Removed drift directory: {}", self.drift_home);
             }
 
             config.remove(extension_name);
