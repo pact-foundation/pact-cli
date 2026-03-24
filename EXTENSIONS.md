@@ -43,6 +43,8 @@ pact extension pact-broker-legacy --help
 - **Features**: Contract conformance testing, API implementation validation
 - **Platforms**: macOS (Intel/Apple Silicon), Linux (x64/ARM64), Windows (x64)
 
+Drift is installed to `~/.drift/` by default:
+
 ### Ruby Legacy Tools
 
 **Traditional Ruby-based Pact tools (pact-legacy)**
