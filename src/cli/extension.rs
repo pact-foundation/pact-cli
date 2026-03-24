@@ -586,46 +586,6 @@ impl ExtensionManager {
         Ok(())
     }
 
-    fn extract_drift_archive(&self, archive_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let extract_dir = self.drift_home.clone();
-        fs::create_dir_all(&extract_dir)?;
-
-        if self.platform.os == "windows" {
-            // Use PowerShell for Windows
-            let status = Cmd::new("powershell")
-                .arg("-Command")
-                .arg(format!(
-                    "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
-                    archive_path, extract_dir
-                ))
-                .status()?;
-
-            if !status.success() {
-                return Err("Failed to extract Windows archive".into());
-            }
-        } else {
-            // Use tar for Unix systems
-            let status = Cmd::new("tar")
-                .arg("-xzf")
-                .arg(archive_path)
-                .arg("-C")
-                .arg(&extract_dir)
-                .status()?;
-
-            if !status.success() {
-                return Err("Failed to extract tar archive".into());
-            }
-        }
-
-        Ok(())
-    }
-
-    fn extract_drift_archive_old(&self, _archive_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        // This function is kept for reference but not used
-        // Binaries are extracted directly without symlinks
-        Ok(())
-    }
-
     fn create_legacy_symlinks_with_version(
         &self,
         version: &str,
