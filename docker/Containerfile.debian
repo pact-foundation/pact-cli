@@ -29,5 +29,7 @@ apt-get install -y --no-install-recommends ca-certificates
 rm -rf /var/lib/apt/lists/*
 EOF
 COPY --from=installer /root/.pact/bin/pact /usr/local/bin/pact
+RUN pact extension install pactflow-ai
+RUN pact extension install drift
 ENTRYPOINT ["pact"]
 CMD ["--help"]

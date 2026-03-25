@@ -23,5 +23,7 @@ LABEL org.opencontainers.image.title="pact" \
       org.opencontainers.image.vendor="Pact Foundation"
 RUN apk add --no-cache ca-certificates
 COPY --from=installer /root/.pact/bin/pact /usr/local/bin/pact
+RUN pact extension install pactflow-ai
+RUN pact extension install drift
 ENTRYPOINT ["pact"]
 CMD ["--help"]
