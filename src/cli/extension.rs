@@ -73,7 +73,13 @@ impl PlatformInfo {
             ("windows", "x86_64") => "x86_64-pc-windows-msvc",
             ("linux", "aarch64") => "aarch64-unknown-linux-gnu",
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu",
-            _ => "x86_64-unknown-linux-gnu", // fallback
+            _ => {
+                eprintln!(
+                    "Unsupported OS and architecture combination: os={}, arch={}",
+                    self.os, self.arch
+                );
+                std::process::exit(1);
+            }
         };
 
         format!("https://download.pactflow.io/ai/dist/{}/latest", target)
@@ -87,7 +93,13 @@ impl PlatformInfo {
             ("windows", "x86_64") => "x86_64-pc-windows-msvc",
             ("linux", "aarch64") => "aarch64-unknown-linux-gnu",
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu",
-            _ => "x86_64-unknown-linux-gnu", // fallback
+            _ => {
+                eprintln!(
+                    "Unsupported OS and architecture combination: os={}, arch={}",
+                    self.os, self.arch
+                );
+                std::process::exit(1);
+            }
         };
 
         format!(
@@ -106,7 +118,13 @@ impl PlatformInfo {
             ("windows", "x86_64") => "windows-x86_64",
             ("linux", "aarch64") => "linux-aarch64",
             ("linux", "x86_64") => "linux-x86_64",
-            _ => "linux-x86_64", // fallback
+            _ => {
+                eprintln!(
+                    "Unsupported OS and architecture combination: os={}, arch={}",
+                    self.os, self.arch
+                );
+                std::process::exit(1);
+            }
         };
 
         format!(
@@ -123,7 +141,13 @@ impl PlatformInfo {
             ("windows", "x86_64") => "windows-x86_64",
             ("linux", "aarch64") => "linux-arm64",
             ("linux", "x86_64") => "linux-x86_64",
-            _ => "linux-x86_64", // fallback
+            _ => {
+                eprintln!(
+                    "Unsupported OS and architecture combination: os={}, arch={}",
+                    self.os, self.arch
+                );
+                std::process::exit(1);
+            }
         }
         .to_string()
     }
