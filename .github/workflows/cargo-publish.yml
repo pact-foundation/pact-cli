@@ -6,6 +6,8 @@ on:
       version:
         description: 'The version of the pact broker cli to release as'
         required: true
+  repository_dispatch:
+    types: [cargo-publish]
 
 jobs:
   publish_crate:

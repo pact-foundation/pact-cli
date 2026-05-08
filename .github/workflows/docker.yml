@@ -6,6 +6,8 @@ on:
       version:
         description: 'The version of the pact cli to release as'
         default: 'latest'
+  repository_dispatch:
+    types: [docker-build]
 
 jobs:
 
@@ -33,5 +35,5 @@ jobs:
         run: hooks/build
         working-directory: ./docker
         env:
-          DOCKER_TAG: ${{ github.event.inputs.version }}
+          DOCKER_TAG: ${{ github.event.client_payload.version || github.event.inputs.version }}
           PUSH_IMAGE: true

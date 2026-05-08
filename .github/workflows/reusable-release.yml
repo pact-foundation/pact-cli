@@ -81,5 +81,96 @@ jobs:
           generate_release_notes: true
           body: ${{ inputs.release_notes }}
           files: dist/*
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish archives and packages
+        if: ${{ inputs.force_release == true || startsWith(github.ref, 'refs/tags/') }}
+        uses: softprops/action-gh-release@v2.5.0
+        with:
+          tag_name: v${{ inputs.version }}
+          name: 'Release v${{ inputs.version }}'
+          generate_release_notes: true
+          body: ${{ inputs.release_notes }}
+          files: dist/*
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-released:
+    if: ${{ inputs.force_release == true || startsWith(github.ref, 'refs/tags/') }}
+    needs: release_workflow
+    strategy:
+      matrix:
+        repository: [pact-foundation/homebrew-tap]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify ${{ matrix.repository }} of gem release
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.GHTOKENFORRELEASEDISPATCH }}
+          repository: ${{ matrix.repository }}
+          event-type: pact-cli-released
+          client-payload: |
+              {
+                "version": "${{ inputs.version }}",
+                "type": "pact-cli-released"
+              }
+  trigger-released:
+    if: ${{ inputs.force_release == true || startsWith(github.ref, 'refs/tags/') }}
+    needs: notify-released
+    strategy:
+      matrix:
+        repository: [pact-foundation/homebrew-tap]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify ${{ matrix.repository }} of gem release
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.GHTOKENFORRELEASEDISPATCH }}
+          repository: ${{ matrix.repository }}
+          event-type: pact-cli-released
+          client-payload: |
+              {
+                "version": "${{ inputs.version }}",
+                "type": "pact-cli-released"
+              }
+
+  trigger-docker:
+    if: ${{ inputs.force_release == true || startsWith(github.ref, 'refs/tags/') }}
+    needs: release_workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger docker workflow - ${{ inputs.version }}
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: trigger-docker-build
+          client-payload: |
+            {
+              "version": "${{ inputs.version }}"
+            }
+      - name: Trigger docker workflow - latest
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: trigger-docker-build
+          client-payload: |
+            {
+              "version": "latest"
+            }
+
+  trigger-cargo-publish:
+    if: ${{ inputs.force_release == true || startsWith(github.ref, 'refs/tags/') }}
+    needs: release_workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger cargo publish workflow
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: trigger-cargo-publish
+          client-payload: |
+            {
+              "version": "${{ inputs.version }}"
+            }
