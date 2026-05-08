@@ -69,6 +69,7 @@ cargo_build_release:
 		else \
 			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --release; \
 		fi; \
+	fi
 	if [[ $(TARGET) == *"musl"* ]]; then \
 		$(BUILDER) build --release --target=$(TARGET) --bin $(BINARY_NAME); \
 	else \
