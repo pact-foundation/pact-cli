@@ -2531,7 +2531,6 @@ dependencies = [
  "clap_complete",
  "comfy-table",
  "home",
- "indexmap 2.13.0",
  "opentelemetry 0.31.0",
  "opentelemetry-appender-tracing",
  "opentelemetry-http",

@@ -37,49 +37,8 @@ TARGETVARIANT - Variant from the --platform e.g. v7
 
 <https://hub.docker.com/_/alpine/tags>
 
-#### Alpine to build
-
-- linux/ppc64le
-- linux/s390x
-
-### Debian
-
-#### Debian to build
-
-- linux/mips64le
-- linux/ppc64le
-- linux/riscv64
-- linux/s390x
-
 ## Rust Platforms
 
 ### rust platform support
 
 - <https://doc.rust-lang.org/rustc/platform-support.html>
-
-### Rust Targets to build
-
-- i686-unknown-linux-musl
-- mips64-unknown-linux-gnuabi64
-- mips64-unknown-linux-muslabi64
-- mips64el-unknown-linux-gnuabi64
-- mips64el-unknown-linux-muslabi64
-- riscv64gc-unknown-linux-musl
-- riscv64gc-unknown-linux-gnu
-- riscv64gc-unknown-freebsd
-- riscv64gc-unknown-netbsd
-- s390x-unknown-linux-musl
-- s390x-unknown-linux-gnu
-
-### cross supported targets
-
-- <https://github.com/cross-rs/cross/blob/main/targets.toml>
-
-- s390x-unknown-linux-gnu
-- riscv64gc-unknown-linux-gnu
-- mips64-unknown-linux-gnuabi64
-- mips64el-unknown-linux-gnuabi64
-- mips64-unknown-linux-muslabi64
-- mips64el-unknown-linux-muslabi64
-
-musl builds currently broken <https://github.com/cross-rs/cross/issues/1422>

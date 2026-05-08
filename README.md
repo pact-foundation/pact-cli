@@ -24,10 +24,6 @@ A consolidated cli consisting of all Pact command line tools
 | Linux (musl)  | arm64        | ✅         |
 | Windows       | x86_64       | ✅         |
 | Windows       | arm64        | ✅         |
-| NetBSD        | x86_64       | ✅         |
-| NetBSD        | arm64        | ✅         |
-| OpenBSD       | x86_64       | ✅         |
-| OpenBSD       | arm64        | ✅         |
 
 ### Install
 

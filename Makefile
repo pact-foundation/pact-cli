@@ -48,12 +48,7 @@ cargo_build_release:
 			cargo +nightly install cross@0.2.5; \
 		fi; \
 	fi
-	if [[ $(TARGET) == "aarch64-unknown-freebsd" ]]; then \
-		if [[ "$(shell uname -s)" == "Linux" ]]; then \
-			sudo apt install libstd-rust-dev; \
-		fi; \
-		cargo +nightly install cross --git https://github.com/cross-rs/cross; \
-	elif [[ $(TARGET) == *"android"* ]] || [[ $(TARGET) == "x86_64-unknown-netbsd" ]] || [[ $(TARGET) == "x86_64-pc-windows-gnu" ]] || [[ $(TARGET) == "x86_64-unknown-freebsd" ]]; then \
+	if [[ $(TARGET) == "x86_64-pc-windows-gnu" ]]; then \
 		echo "installing latest cross"; \
 		if [[ $(SLIM) == "true" ]]; then \
 			cargo +nightly install cross --git https://github.com/cross-rs/cross; \
@@ -67,44 +62,14 @@ cargo_build_release:
 	fi
 	if [[ $(SLIM) == "true" ]]; then \
 		echo "building slimmest binaries"; \
-		if [[ $(TARGET) == "aarch64-unknown-freebsd" ]]; then \
-			echo "building with cargo nightly, plus std and core for aarch64-unknown-freebsd"; \
-			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro --profile release-aarch64-freebsd --target=$(TARGET); \
-			mkdir -p target/aarch64-unknown-freebsd/release; \
-			mv target/aarch64-unknown-freebsd/release-aarch64-freebsd/$(BINARY_NAME) target/aarch64-unknown-freebsd/release; \
+		if [[ $(TARGET) == "aarch64-unknown-linux-musl" ]]; then \
+			RUSTFLAGS="-Zlocation-detail=none -C link-arg=-lgcc" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
+		elif [[ $(TARGET) == *"musl"* ]]; then \
+			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
 		else \
-			if [[ $(TARGET) == *"risc"* ]] && [[ $(TARGET) != *"musl"* ]]; then \
-				echo "building for risc targets, refusing to build with nightly as unable to build-std"; \
-				rustup toolchain install $(TARGET); \
-				rustup component add rust-src --toolchain stable --target $(TARGET); \
-				cargo install cross@0.2.5; \
-				$(BUILDER) build --target=$(TARGET) --release; \
-			elif [[ $(TARGET) == *"risc"* ]] && [[ $(TARGET) == *"musl"* ]]; then \
-				echo "building for risc targets, build with nightly for build-std"; \
-				RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-			elif [[ $(TARGET) == *"s390x"* ]] && [[ $(TARGET) == *"musl"* ]]; then \
-				echo "building for s390x musl targets, build with nightly for build-std"; \
-				RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-			elif [[ $(TARGET) == *"mips"* ]]; then \
-				echo "building for mips targets, refusing to build with nightly as unable to build-std"; \
-				rustup toolchain install $(TARGET); \
-				rustup component add rust-src --toolchain stable --target $(TARGET); \
-				cargo install cross --git https://github.com/cross-rs/cross; \
-				$(BUILDER) build --target=$(TARGET) --release; \
-			elif [[ $(TARGET) == "aarch64-unknown-linux-musl" ]] || [[ $(TARGET) == "armv5te-unknown-linux-musleabi" ]]; then \
-				RUSTFLAGS="-Zlocation-detail=none -C link-arg=-lgcc" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-			elif [[ $(TARGET) == *"musl"* ]]; then \
-				RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-			else \
-				RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --release; \
-			fi; \
-		fi \
-	elif [[ $(TARGET) == "aarch64-unknown-freebsd" ]]; then \
-		echo "building with cargo nightly, plus std and core for aarch64-unknown-freebsd"; \
-		$(BUILDER) +nightly build -Z build-std=std,core,alloc,proc_macro --profile release-aarch64-freebsd --target=$(TARGET); \
-		mkdir -p target/aarch64-unknown-freebsd/release; \
-		mv target/aarch64-unknown-freebsd/release-aarch64-freebsd/$(BINARY_NAME) target/aarch64-unknown-freebsd/release; \
-	elif [[ $(TARGET) == *"musl"* ]]; then \
+			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --release; \
+		fi; \
+	if [[ $(TARGET) == *"musl"* ]]; then \
 		$(BUILDER) build --release --target=$(TARGET) --bin $(BINARY_NAME); \
 	else \
 		$(BUILDER) build --release --target=$(TARGET); \
