@@ -7,6 +7,8 @@ use std::{
 };
 
 use clap::{value_parser, Arg, ArgMatches, Command};
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -123,6 +125,26 @@ impl PlatformInfo {
     }
 }
 
+/// Builds an HTTP client with retry middleware for extension downloads and API calls.
+///
+/// The client retries transient failures (5xx, 408, 429) up to 8 times using
+/// exponential back-off. A `User-Agent` header identifying the pact-cli version
+/// is included on every request.
+fn build_extension_client() -> ClientWithMiddleware {
+    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(8);
+    let inner = reqwest::Client::builder()
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION")
+        ))
+        .build()
+        .expect("failed to build reqwest client");
+    ClientBuilder::new(inner)
+        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+        .build()
+}
+
 pub struct ExtensionManager {
     pub extensions_home: String,
     pub platform: PlatformInfo,
@@ -227,7 +249,7 @@ impl ExtensionManager {
 
         println!("🚀 Downloading pactflow-ai from {}", url);
 
-        let response = reqwest::get(&url).await?;
+        let response = build_extension_client().get(&url).send().await?;
         if !response.status().is_success() {
             return Err(
                 format!("Failed to download pactflow-ai: HTTP {}", response.status()).into(),
@@ -304,7 +326,7 @@ impl ExtensionManager {
 
         println!("🚀 Downloading pact-legacy from {}", url);
 
-        let response = reqwest::get(&url).await?;
+        let response = build_extension_client().get(&url).send().await?;
         if !response.status().is_success() {
             return Err(format!(
                 "Failed to download pact-legacy: HTTP {}",
@@ -340,12 +362,7 @@ impl ExtensionManager {
         &self,
     ) -> Result<String, Box<dyn std::error::Error>> {
         let url = "https://api.github.com/repos/pact-foundation/pact-standalone/releases/latest";
-        let client = reqwest::Client::new();
-        let response = client
-            .get(url)
-            .header("User-Agent", "pact-cli")
-            .send()
-            .await?;
+        let response = build_extension_client().get(url).send().await?;
 
         let release: serde_json::Value = response.json().await?;
         let tag_name = release["tag_name"]
@@ -357,12 +374,7 @@ impl ExtensionManager {
 
     async fn get_latest_pactflow_ai_version(&self) -> Result<String, Box<dyn std::error::Error>> {
         let url = self.platform.get_pactflow_ai_url();
-        let client = reqwest::Client::new();
-        let response = client
-            .get(&url)
-            .header("User-Agent", "pact-cli")
-            .send()
-            .await?;
+        let response = build_extension_client().get(&url).send().await?;
 
         let text = response.text().await?;
         // The API returns just the version number like "1.11.4"

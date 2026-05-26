@@ -157,7 +157,7 @@ Commands:
   plugin       CLI utility for Pact plugins
   mock         Standalone Pact mock server
   verifier     Standalone pact verifier for provider pact verification
-  stub         Pact Stub Server 0.7.0
+  stub         Pact Stub Server 0.7.1
   help         Print this message or the help of the given subcommand(s)
 
 Options:
@@ -507,6 +507,8 @@ Pact Broker options:
           Enables Pending Pacts
       --include-wip-pacts-since <include-wip-pacts-since>
           Allow pacts that don't match given consumer selectors (or tags) to  be verified, without causing the overall task to fail. For more information, see https://pact.io/wip
+      --retries <N>
+          The number of times to retry failed HTTP requests to the Pact Broker (retries on 5xx, 408, and 429). Delays use exponential back-off starting at 500 ms and doubling each attempt (0.5 s, 1 s, 2 s, 4 s, 8 s, …). 429 responses honour the Retry-After header when present. [env: PACT_BROKER_HTTP_RETRIES=] [default: 8]
 
 Development options:
       --exit-on-first-error  Stops the verifier at the first failure
@@ -518,7 +520,7 @@ Development options:
 
 ```console
 $ pact stub --help
-Pact Stub Server 0.7.0
+Pact Stub Server 0.7.1
 
 Usage: pact stub [OPTIONS]
 
@@ -571,6 +573,8 @@ Options:
           Consumer name or regex to use to filter the Pacts fetched from the Pact broker (can be repeated)
       --provider-name <provider-name>
           Provider name or regex to use to filter the Pacts fetched from the Pact broker (can be repeated)
+      --retries <PACT_BROKER_HTTP_RETRIES>
+          The number of times to retry failed HTTP requests (retries on 5xx, 408, and 429). Delays use exponential back-off starting at 500 ms and doubling each attempt. [env: PACT_BROKER_HTTP_RETRIES=] [default: 8]
   -w, --watch
           Watch for changes in pact files and reload automatically
   -v, --version
