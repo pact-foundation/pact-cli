@@ -79,6 +79,7 @@ jobs:
         run: make cargo_test
       - name: test pact-cli with locally running Pact Broker (Unix)
         if: ${{ inputs.target == 'x86_64-unknown-linux-gnu' }}
+        timeout-minutes: 15
         run: ./run.sh
         shell: bash
         env:

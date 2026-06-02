@@ -12,7 +12,11 @@ pid=$!
 
 # # BEFORE SUITE wait for mock service to start up
 # # invoked by the pact framework
-while [ "200" -ne "$(curl -s -o /dev/null -w "%{http_code}" localhost:1234)" ]; do sleep 0.5; done
+_wait=0
+while [ "200" -ne "$(curl -s -o /dev/null -w "%{http_code}" localhost:1234)" ]; do
+  sleep 0.5; _wait=$((_wait+1))
+  [ $_wait -lt 60 ] || { echo "ERROR: timed out waiting for mock service on :1234"; exit 1; }
+done
 
 # # uncomment this line to see the curl commands interleaved with the responses
 # # set -x
@@ -43,7 +47,11 @@ mock_port=$(echo "$mock_output" | awk '/Mock server/ {print $7}')
 
 # # BEFORE SUITE wait for mock server to start up
 # # invoked by the pact framework
-while [ "200" -ne "$(curl -s -o /dev/null -w "%{http_code}" localhost:1234/mockserver/$mock_id)" ]; do sleep 0.5; done
+_wait=0
+while [ "200" -ne "$(curl -s -o /dev/null -w "%{http_code}" localhost:1234/mockserver/$mock_id)" ]; do
+  sleep 0.5; _wait=$((_wait+1))
+  [ $_wait -lt 60 ] || { echo "ERROR: timed out waiting for mock server $mock_id on :1234"; exit 1; }
+done
 
 # # get details of the newly created mock server via api
 # curl -s -H "Content-Type: application/json" localhost:1234/mockserver/$mock_id | jq .
