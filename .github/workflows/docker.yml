@@ -13,7 +13,7 @@ jobs:
 
   cli_docker:
     runs-on: ubuntu-latest
-    permissions: ## needed to publish images to ghcr.io
+    permissions: ## needed to publish images to ghcr.io
       contents: read
       packages: write
     steps:
