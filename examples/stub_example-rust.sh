@@ -9,7 +9,11 @@ pid=$!
 
 # BEFORE SUITE wait for mock service to start up
 # invoked by the pact framework
-while [ "200" -ne "$(curl -H "X-Pact-Stub-Server: true" -s -o /dev/null  -w "%{http_code}" localhost:1234/healthcheck)" ]; do sleep 0.5; done
+_wait=0
+while [ "200" -ne "$(curl -H "X-Pact-Stub-Server: true" -s -o /dev/null -w "%{http_code}" localhost:1234/healthcheck)" ]; do
+  sleep 0.5; _wait=$((_wait+1))
+  [ $_wait -lt 60 ] || { echo "ERROR: timed out waiting for stub server on :1234"; exit 1; }
+done
 
 # IN A TEST execute interaction(s)
 # this would be done by the consumer code under test
@@ -21,4 +25,4 @@ echo ''
 # this would be invoked by the test framework
 kill -9 $pid
 
-while [ kill -0 $pid 2> /dev/null ]; do sleep 0.5; done
+while kill -0 $pid 2>/dev/null; do sleep 0.5; done
