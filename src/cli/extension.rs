@@ -880,27 +880,21 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
             return Err("Please specify an extension name or use --all flag".into());
             }
         }
-        Some((external_cmd, _)) => {
+        Some((external_cmd, sub_args)) => {
             // Handle external subcommands - pass through to extension
-            let mut args: Vec<String> = std::env::args().collect();
+            let extension_args: Vec<String> = sub_args
+                .get_many::<String>("")
+                .unwrap_or_default()
+                .cloned()
+                .collect();
 
-            // Find the position of "extension" and remove everything before and including it
-            if let Some(pos) = args.iter().position(|x| x == "extension") {
-                args.drain(0..=pos);
-            }
-
-            if !args.is_empty() {
-                let extension_name = &args[0];
-                let extension_args = &args[1..];
-
-                match manager.run_extension(extension_name, extension_args) {
-                    Ok(status) => {
-                        if !status.success() {
-                            std::process::exit(status.code().unwrap_or(1));
-                        }
+            match manager.run_extension(external_cmd, &extension_args) {
+                Ok(status) => {
+                    if !status.success() {
+                        std::process::exit(status.code().unwrap_or(1));
                     }
-                    Err(e) => return Err(e),
                 }
+                Err(e) => return Err(e),
             }
         }
         None => {
