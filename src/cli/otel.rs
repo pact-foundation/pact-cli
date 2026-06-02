@@ -151,24 +151,29 @@ pub fn init_logging(otel_config: OtelConfig) -> Option<SdkTracerProvider> {
     }
 
     // OTEL log output
+    //
+    // SimpleLogProcessor calls futures::executor::block_on internally, which
+    // panics when invoked from within an async executor (e.g. a Tokio worker
+    // thread). BatchLogRecordProcessor uses a background std::thread instead
+    // and is safe to use from any context.
     if otel_master || otel_config.enable_logs.unwrap_or(false) {
         let otel_log_stdout_exporter = opentelemetry_stdout::LogExporter::default();
 
         let otel_logger_provider = if otel_config.enable_logs.unwrap_or(false) {
-            let otel_otlp_stdout_exporter = opentelemetry_otlp::LogExporter::builder()
+            let otel_otlp_exporter = opentelemetry_otlp::LogExporter::builder()
                 .with_http()
                 .with_protocol(Protocol::HttpBinary)
                 .build()
                 .expect("Failed to create log exporter");
             SdkLoggerProvider::builder()
                 .with_resource(get_resource())
-                .with_simple_exporter(otel_log_stdout_exporter)
-                .with_batch_exporter(otel_otlp_stdout_exporter)
+                .with_batch_exporter(otel_log_stdout_exporter)
+                .with_batch_exporter(otel_otlp_exporter)
                 .build()
         } else {
             SdkLoggerProvider::builder()
                 .with_resource(get_resource())
-                .with_simple_exporter(otel_log_stdout_exporter)
+                .with_batch_exporter(otel_log_stdout_exporter)
                 .build()
         };
         let otel_layer = OpenTelemetryTracingBridge::new(&otel_logger_provider);
