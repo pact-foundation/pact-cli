@@ -45,20 +45,11 @@ cargo_build_release:
 			rustup component add rust-src --toolchain nightly --target=$(TARGET); \
 		fi; \
 		if [[ $(BUILDER) == "cross" ]]; then \
-			cargo +nightly install cross@0.2.5; \
+			command -v cross > /dev/null 2>&1 || cargo +nightly install cross@0.2.5; \
 		fi; \
 	fi
-	if [[ $(TARGET) == "x86_64-pc-windows-gnu" ]]; then \
-		echo "installing latest cross"; \
-		if [[ $(SLIM) == "true" ]]; then \
-			cargo +nightly install cross --git https://github.com/cross-rs/cross; \
-		else \
-			cargo install cross --git https://github.com/cross-rs/cross; \
-		fi; \
-	else \
-		if [[ $(BUILDER) == "cross" ]]; then \
-			cargo install cross@0.2.5; \
-		fi; \
+	if [[ $(BUILDER) == "cross" ]]; then \
+		command -v cross > /dev/null 2>&1 || cargo install cross@0.2.5; \
 	fi
 	if [[ $(SLIM) == "true" ]]; then \
 		echo "building slimmest binaries"; \

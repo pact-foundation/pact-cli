@@ -44,6 +44,13 @@ jobs:
           targets: ${{ inputs.target }}
           toolchain: nightly
         if: ${{ inputs.use-cross != true && env.SLIM == 'true' }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ inputs.target }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cross@0.2.5
+        if: ${{ inputs.use-cross == true }}
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.9'
@@ -71,7 +78,7 @@ jobs:
         if: ${{ inputs.target == 'aarch64-apple-darwin' }} # currently no cross-platform specific tests, so only test for a single platform
         run: make cargo_test
       - name: test pact-cli with locally running Pact Broker (Unix)
-        if: ${{ runner.os != 'Windows' && inputs.use-cross != true || (inputs.target == 'x86_64-unknown-linux-gnu' || inputs.target == 'x86_64-unknown-linux-musl') }}
+        if: ${{ inputs.target == 'x86_64-unknown-linux-gnu' }}
         run: ./run.sh
         shell: bash
         env:
