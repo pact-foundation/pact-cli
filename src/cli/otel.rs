@@ -8,7 +8,6 @@ use opentelemetry_sdk::Resource;
 use opentelemetry_sdk::{
     logs::SdkLoggerProvider, propagation::TraceContextPropagator, trace::SdkTracerProvider,
 };
-use opentelemetry_stdout::LogExporter;
 use std::sync::OnceLock;
 use tracing::info;
 use tracing::Level;
@@ -22,6 +21,8 @@ pub struct OtelConfig {
     pub exporter: Option<Vec<String>>,
     pub endpoint: Option<String>,
     pub protocol: Option<String>,
+    /// Master switch: enables both traces and logs when true.
+    /// Individual `enable_traces`/`enable_logs` flags override independently.
     pub enable_otel: Option<bool>,
     pub enable_traces: Option<bool>,
     pub enable_logs: Option<bool>,
@@ -82,8 +83,10 @@ pub fn init_logging(otel_config: OtelConfig) -> Option<SdkTracerProvider> {
 
     let mut tracer_provider: Option<SdkTracerProvider> = None;
 
+    let otel_master = otel_config.enable_otel.unwrap_or(false);
+
     // OTEL trace output
-    if otel_config.enable_traces.unwrap_or(false) {
+    if otel_master || otel_config.enable_traces.unwrap_or(false) {
         let otlp_exporter = if let Some(exporters) = &otel_config.exporter {
             if exporters.iter().any(|e| e == "otlp") {
                 let endpoint = otel_config
@@ -147,8 +150,8 @@ pub fn init_logging(otel_config: OtelConfig) -> Option<SdkTracerProvider> {
         layers.push(Box::new(telemetry));
     }
 
-    // // OTEL log output
-    if otel_config.enable_logs.unwrap_or(false) {
+    // OTEL log output
+    if otel_master || otel_config.enable_logs.unwrap_or(false) {
         let otel_log_stdout_exporter = opentelemetry_stdout::LogExporter::default();
 
         let otel_logger_provider = if otel_config.enable_logs.unwrap_or(false) {
