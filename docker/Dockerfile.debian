@@ -1,6 +1,6 @@
 ARG ARCH=
 ARG BASE_IMAGE=debian:13-slim
-FROM ${BASE_IMAGE} as builder
+FROM ${BASE_IMAGE} AS builder
 ARG TARGETARCH
 ARG TARGETVARIANT
 ARG VERSION=0.0.9
@@ -48,7 +48,9 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 
 FROM --platform=linux/${TARGETARCH}${TARGETVARIANT:+/${TARGETVARIANT}} ${BASE_IMAGE}
 WORKDIR /app
-COPY --from=builder /pact /app/
+COPY --from=builder /pact /usr/local/bin
+RUN pact extension install pactflow-ai
+RUN pact extension install drift
 EXPOSE 8080
-ENTRYPOINT ["./pact"]
+ENTRYPOINT ["pact"]
 CMD ["--help"]
