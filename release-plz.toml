@@ -1,0 +1,53 @@
+[workspace]
+pr_draft = true
+git_release_enable = false
+publish = true
+
+[changelog]
+protect_breaking_commits = false
+tag_pattern = 'v[0-9]+\.[0-9]+\.[0-9]+'
+sort_commits = "oldest"
+
+commit_preprocessors = [
+  { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](https://github.com/pact-foundation/pact-cli/issues/${2}))" },
+]
+
+commit_parsers = [
+  { message = "^(chore|fix)\\(deps.*\\)", skip = true },
+  { group = "<!-- 00 -->🚀 Features", message = "^feat" },
+  { group = "<!-- 01 -->🐛 Bug Fixes", message = "^fix" },
+  { group = "<!-- 50 -->🚜 Refactor", message = "^refactor" },
+  { group = "<!-- 51 -->⚡️ Performance", message = "^perf" },
+  { group = "<!-- 52 -->🎨 Styling", message = "^style" },
+  { group = "<!-- 60 -->📚 Documentation", message = "^docs" },
+  { group = "<!-- 80 -->🧪 Testing", message = "^test" },
+  { group = "<!-- 98 -->↩️ Revert", message = "^revert" },
+  { group = "<!-- 99 -->🛠️ Miscellaneous Tasks", message = "^chore" },
+  { group = "<!-- 99 -->📦 Other", message = ".*" },
+]
+
+trim = true
+header = """
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+"""
+body = """
+{% if version -%}
+  ## [{{ version | trim_start_matches(pat="v") }}] _{{ timestamp | date(format="%Y-%m-%d") }}_
+
+{% else -%}
+  ## [unreleased]
+
+{% endif -%}
+{% for group, commits in commits | group_by(attribute="group") -%}
+    ### {{ group | striptags | trim | upper_first }}
+
+    {% for commit in commits -%}
+        -   {% if commit.scope %}_({{ commit.scope }})_ {% endif -%}
+            {% if commit.breaking %}[**breaking**] {% endif -%}
+            {{ commit.message | upper_first }}
+    {% endfor %}
+{% endfor -%}
+"""

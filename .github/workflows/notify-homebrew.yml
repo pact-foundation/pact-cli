@@ -1,0 +1,52 @@
+name: Notify Homebrew tap
+
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag (e.g. v0.10.3)'
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve version
+        id: version
+        env:
+          PLAN: ${{ inputs.plan }}
+          MANUAL_TAG: ${{ inputs.tag }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_call" ]; then
+            TAG="$(echo "$PLAN" | jq -r '.announcement_tag')"
+          else
+            TAG="$MANUAL_TAG"
+          fi
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        with:
+          app-id: ${{ vars.PACT_FOUNDATION_BOT_APP_ID }}
+          private-key: ${{ secrets.PACT_FOUNDATION_BOT_PRIVATE_KEY }}
+          owner: pact-foundation
+          repositories: homebrew-tap
+      - name: Dispatch to homebrew-tap
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0  # v3.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: pact-foundation/homebrew-tap
+          event-type: pact-cli-released
+          client-payload: |
+            {
+              "version": "${{ steps.version.outputs.version }}",
+              "type": "pact-cli-released"
+            }

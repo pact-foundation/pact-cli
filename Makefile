@@ -5,7 +5,6 @@ SHELL := /bin/bash
 TARGET=
 USE_CROSS=
 BINARY_NAME?=pact
-SLIM=false
 BUILDER=cargo
 
 ifeq ($(TARGET),)
@@ -22,9 +21,6 @@ target_list = $(shell rustup target list)
 rustup_target_list:
 	@echo "$(target_list)" | sed 's/([^)]*)//g' | tr ' ' '\n' | sed '/^\s*$$/d'
 
-is_slim:
-	echo $(SLIM)
-
 use_cross:
 	echo $(BUILDER)
 
@@ -36,30 +32,8 @@ cargo_test:
 # by default will use the host target
 cargo_build_release:
 	echo "Building for target: $(TARGET)"
-	if [[ $(SLIM) == "true" ]]; then \
-		if [[ "$(shell uname -s)" == "Linux" ]]; then \
-			sudo apt install libstd-rust-dev; \
-			rustup toolchain install nightly; \
-			rustup component add rust-src --toolchain nightly; \
-		else \
-			rustup component add rust-src --toolchain nightly --target=$(TARGET); \
-		fi; \
-		if [[ $(BUILDER) == "cross" ]]; then \
-			command -v cross > /dev/null 2>&1 || cargo +nightly install cross@0.2.5; \
-		fi; \
-	fi
 	if [[ $(BUILDER) == "cross" ]]; then \
 		command -v cross > /dev/null 2>&1 || cargo install cross@0.2.5; \
-	fi
-	if [[ $(SLIM) == "true" ]]; then \
-		echo "building slimmest binaries"; \
-		if [[ $(TARGET) == "aarch64-unknown-linux-musl" ]]; then \
-			RUSTFLAGS="-Zlocation-detail=none -C link-arg=-lgcc" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-		elif [[ $(TARGET) == *"musl"* ]]; then \
-			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --bin $(BINARY_NAME) --release; \
-		else \
-			RUSTFLAGS="-Zlocation-detail=none" $(BUILDER) +nightly build -Z build-std=std,panic_abort,core,alloc,proc_macro -Z build-std-features=panic_immediate_abort --target=$(TARGET) --release; \
-		fi; \
 	fi
 	if [[ $(TARGET) == *"musl"* ]]; then \
 		$(BUILDER) build --release --target=$(TARGET) --bin $(BINARY_NAME); \
