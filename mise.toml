@@ -1,0 +1,4 @@
+[tools]
+"aqua:cargo-bins/cargo-binstall" = "1"
+"cargo:cargo-dist" = "0.32"
+"cargo:release-plz" = "0.3"
