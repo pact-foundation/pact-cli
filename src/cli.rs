@@ -11,7 +11,7 @@ pub mod pact_broker_docker;
 pub mod pact_broker_ruby;
 
 pub fn build_cli() -> Command {
-    let app = Command::new("pact")
+    Command::new("pact")
         .about("🔗 Pact in a single binary - Mock/Stub Server, Provider Verifier, Broker Client & Plugin CLI")
         .long_about("
 
@@ -57,8 +57,7 @@ Contract testing with Pact lets you:
         .subcommand(pact_plugin_cli::Cli::command().name("plugin"))
         .subcommand(pact_mock_server_cli::setup_args().name("mock"))
         .subcommand(pact_verifier_cli::args::setup_app().name("verifier"))
-        .subcommand(pact_stub_server::build_args().name("stub"));
-    app
+        .subcommand(pact_stub_server::build_args().name("stub"))
 }
 
 fn add_completions_subcommand() -> Command {
@@ -67,7 +66,7 @@ fn add_completions_subcommand() -> Command {
     .arg(Arg::new("shell")
         .value_name("SHELL")
         .required(true)
-        .value_parser(clap::builder::PossibleValuesParser::new(&["bash", "fish", "zsh", "powershell", "elvish"]))
+        .value_parser(clap::builder::PossibleValuesParser::new(["bash", "fish", "zsh", "powershell", "elvish"]))
         .help("The shell to generate the script for"))
     .arg(Arg::new("dir")
         .short('d')
@@ -127,7 +126,7 @@ fn add_otel_options_args() -> Vec<Arg> {
             .default_value("http")
             .requires_if("otlp", "otel-exporter")
             .env("OTEL_EXPORTER_OTLP_PROTOCOL")
-            .value_parser(clap::builder::PossibleValuesParser::new(&[
+            .value_parser(clap::builder::PossibleValuesParser::new([
                 "http",
                 "http/protobuf",
             ])),

@@ -328,18 +328,13 @@ impl ExtensionManager {
 
         let response = build_extension_client().get(&url).send().await?;
         if !response.status().is_success() {
-            return Err(format!(
-                "Failed to download pact-legacy: HTTP {}",
-                response.status()
-            )
-            .into());
+            return Err(
+                format!("Failed to download pact-legacy: HTTP {}", response.status()).into(),
+            );
         }
 
         let body = response.bytes().await?;
-        let archive_path = format!(
-            "{}/pact-legacy.{}",
-            self.extensions_home, archive_ext
-        );
+        let archive_path = format!("{}/pact-legacy.{}", self.extensions_home, archive_ext);
         let mut file = fs::File::create(&archive_path)?;
         file.write_all(&body)?;
         drop(file);
@@ -693,66 +688,66 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
 
             // Fetch latest versions from APIs
             let latest_ruby_version = match manager.get_latest_ruby_standalone_version().await {
-            Ok(v) => v,
-            Err(_) => "unknown".to_string(),
+                Ok(v) => v,
+                Err(_) => "unknown".to_string(),
             };
             let latest_pactflow_ai_version = match manager.get_latest_pactflow_ai_version().await {
-            Ok(v) => v,
-            Err(_) => "unknown".to_string(),
+                Ok(v) => v,
+                Err(_) => "unknown".to_string(),
             };
 
             println!("📦 Available extensions:");
-            
+
             let mut table = comfy_table::Table::new();
             table
-            .set_header(vec!["Name", "Type", "Installed", "Latest", "Status"])
-            .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
+                .set_header(vec!["Name", "Type", "Installed", "Latest", "Status"])
+                .set_content_arrangement(comfy_table::ContentArrangement::Dynamic);
 
             for (name, config) in extensions {
-            if installed_only && !config.installed {
-                continue;
-            }
-
-            let ext_type = match config.extension_type {
-                ExtensionType::PactflowAi => "PactFlow AI",
-                ExtensionType::PactRubyStandalone => "Pact Legacy",
-                ExtensionType::External => "External",
-            };
-
-            let status = if config.installed {
-                "✅ Installed"
-            } else {
-                "❌ Not Installed"
-            };
-            let installed_version = if config.installed {
-                if matches!(config.extension_type, ExtensionType::PactflowAi) {
-                match manager.get_installed_pactflow_ai_version() {
-                    Ok(v) => v,
-                    Err(_) => "unknown".to_string(),
+                if installed_only && !config.installed {
+                    continue;
                 }
-                } else {
-                config.version.clone()
-                }
-            } else {
-                "-".to_string()
-            };
 
-            let latest_version =
-                if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
-                latest_ruby_version.clone()
-                } else if matches!(config.extension_type, ExtensionType::PactflowAi) {
-                latest_pactflow_ai_version.clone()
-                } else {
-                "-".to_string()
+                let ext_type = match config.extension_type {
+                    ExtensionType::PactflowAi => "PactFlow AI",
+                    ExtensionType::PactRubyStandalone => "Pact Legacy",
+                    ExtensionType::External => "External",
                 };
 
-            table.add_row(vec![
-                name,
-                ext_type.to_string(),
-                installed_version,
-                latest_version,
-                status.to_string(),
-            ]);
+                let status = if config.installed {
+                    "✅ Installed"
+                } else {
+                    "❌ Not Installed"
+                };
+                let installed_version = if config.installed {
+                    if matches!(config.extension_type, ExtensionType::PactflowAi) {
+                        match manager.get_installed_pactflow_ai_version() {
+                            Ok(v) => v,
+                            Err(_) => "unknown".to_string(),
+                        }
+                    } else {
+                        config.version.clone()
+                    }
+                } else {
+                    "-".to_string()
+                };
+
+                let latest_version =
+                    if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
+                        latest_ruby_version.clone()
+                    } else if matches!(config.extension_type, ExtensionType::PactflowAi) {
+                        latest_pactflow_ai_version.clone()
+                    } else {
+                        "-".to_string()
+                    };
+
+                table.add_row(vec![
+                    name,
+                    ext_type.to_string(),
+                    installed_version,
+                    latest_version,
+                    status.to_string(),
+                ]);
             }
 
             println!("{}", table);
@@ -843,41 +838,41 @@ pub async fn run_extension_command(args: &ArgMatches) -> Result<(), Box<dyn std:
             let all = sub_args.get_flag("all");
 
             if all {
-            let extensions = manager.list_extensions();
-            let mut installed_extensions: Vec<_> = extensions
-                .iter()
-                .filter(|(_, config)| config.installed)
-                .map(|(name, config)| (name.clone(), config.clone()))
-                .collect();
+                let extensions = manager.list_extensions();
+                let mut installed_extensions: Vec<_> = extensions
+                    .iter()
+                    .filter(|(_, config)| config.installed)
+                    .map(|(name, config)| (name.clone(), config.clone()))
+                    .collect();
 
-            // For PactRubyStandalone extensions, only keep the master entry
-            let mut ruby_found = false;
-            installed_extensions.retain(|(name, config)| {
-                if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
-                if !ruby_found && name == "pact-legacy" {
-                    ruby_found = true;
-                    true
-                } else {
-                    false
+                // For PactRubyStandalone extensions, only keep the master entry
+                let mut ruby_found = false;
+                installed_extensions.retain(|(name, config)| {
+                    if matches!(config.extension_type, ExtensionType::PactRubyStandalone) {
+                        if !ruby_found && name == "pact-legacy" {
+                            ruby_found = true;
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        true
+                    }
+                });
+
+                if installed_extensions.is_empty() {
+                    println!("⚠️  No extensions are currently installed.");
+                    return Ok(());
                 }
-                } else {
-                true
+
+                println!("🗑️  Uninstalling all extensions...");
+                for (ext_name, _) in installed_extensions {
+                    manager.uninstall_extension(&ext_name)?;
                 }
-            });
-
-            if installed_extensions.is_empty() {
-                println!("⚠️  No extensions are currently installed.");
-                return Ok(());
-            }
-
-            println!("🗑️  Uninstalling all extensions...");
-            for (ext_name, _) in installed_extensions {
-                manager.uninstall_extension(&ext_name)?;
-            }
             } else if let Some(ext_name) = extension {
-            manager.uninstall_extension(ext_name)?;
+                manager.uninstall_extension(ext_name)?;
             } else {
-            return Err("Please specify an extension name or use --all flag".into());
+                return Err("Please specify an extension name or use --all flag".into());
             }
         }
         Some((external_cmd, sub_args)) => {

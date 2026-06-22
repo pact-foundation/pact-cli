@@ -50,20 +50,19 @@ pub fn main() -> ExitCode {
         ),
         Err(_) => (false, false, false, None, None, None, None),
     };
-    let otel_config = Some(crate::cli::otel::OtelConfig {
-        exporter: otel_exporter.map(|v| v.clone()),
+    let otel_config = crate::cli::otel::OtelConfig {
+        exporter: otel_exporter,
         endpoint: otel_exporter_endpoint.cloned(),
         protocol: otel_exporter_protocol.cloned(),
         enable_otel: Some(enable_otel),
         enable_traces: Some(enable_otel_traces),
         enable_logs: Some(enable_otel_logs),
         log_level,
-    });
-    let tracer_provider = init_logging(otel_config.unwrap());
+    };
+    let tracer_provider = init_logging(otel_config);
     let _tracer_provider_dropper;
-    if tracer_provider.is_some() {
-        let tracer_provider = tracer_provider.unwrap().clone();
-        _tracer_provider_dropper = crate::cli::otel::TracerProviderDropper(tracer_provider);
+    if let Some(tracer_provider) = &tracer_provider {
+        _tracer_provider_dropper = crate::cli::otel::TracerProviderDropper(tracer_provider.clone());
     }
     tracing::debug!("Starting application");
     let root = span!(tracing::Level::TRACE, "pact-cli", work_units = 2);

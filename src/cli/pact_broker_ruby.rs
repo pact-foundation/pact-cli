@@ -273,7 +273,7 @@ pub fn run(args: &ArgMatches) -> Result<(), String> {
             let detach = args.get_flag("detach");
             if detach {
                 println!("🚀 Running in the background");
-                return Ok(());
+                Ok(())
             } else {
                 while child.try_wait().unwrap().is_none() {
                     std::thread::sleep(std::time::Duration::from_secs(1));
@@ -299,7 +299,7 @@ pub fn run(args: &ArgMatches) -> Result<(), String> {
                     }
                 }
                 let _ = fs::remove_file(&pid_file_path);
-                return Ok(());
+                Ok(())
             }
         }
         Some(("stop", _args)) => {
