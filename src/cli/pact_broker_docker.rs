@@ -11,20 +11,21 @@ pub fn add_docker_broker_subcommand() -> Command {
 pub fn run(args: &ArgMatches) -> Result<(), ExitCode> {
     match args.subcommand() {
         Some(("start", _args)) => {
-            let mut command_args = vec![];
-            command_args.push("run");
-            command_args.push("-d");
-            command_args.push("--name");
-            command_args.push("pact-broker");
-            command_args.push("-p");
-            command_args.push("9292:9292");
-            command_args.push("--env");
-            command_args.push("PACT_BROKER_PORT=9292");
-            command_args.push("--env");
-            command_args.push("PACT_BROKER_DATABASE_URL=sqlite:////tmp/pact_broker.sqlite");
-            command_args.push("--env");
-            command_args.push("'PACT_BROKER_BASE_URL=http://localhost http://localhost http://localhost:9292 http://pact-broker:9292 https://host.docker.internal http://host.docker.internal http://host.docker.internal:9292'");
-            command_args.push("pactfoundation/pact-broker:latest");
+            let command_args = vec![
+                "run",
+                "-d",
+                "--name",
+                "pact-broker",
+                "-p",
+                "9292:9292",
+                "--env",
+                "PACT_BROKER_PORT=9292",
+                "--env",
+                "PACT_BROKER_DATABASE_URL=sqlite:////tmp/pact_broker.sqlite",
+                "--env",
+                "'PACT_BROKER_BASE_URL=http://localhost http://localhost http://localhost:9292 http://pact-broker:9292 https://host.docker.internal http://host.docker.internal http://host.docker.internal:9292'",
+                "pactfoundation/pact-broker:latest",
+            ];
 
             println!(
                 "Starting Pact Broker Docker container with command: docker {}",
