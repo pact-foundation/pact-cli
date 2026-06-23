@@ -131,6 +131,9 @@ Our images are hosted on both DockerHub and GitHub Container Registry:
 
 ### All commands
 
+<details>
+<summary>Show help</summary>
+
 ```console
 $ pact --help
 
@@ -212,7 +215,12 @@ Options:
 
 ```
 
+</details>
+
 ### `broker`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact broker --help
@@ -277,7 +285,12 @@ Options:
 
 ```
 
+</details>
+
 ### `pactflow`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact pactflow --help
@@ -309,7 +322,12 @@ Options:
 
 ```
 
+</details>
+
 ### `plugin`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact plugin --help
@@ -355,7 +373,12 @@ Options:
 
 ```
 
+</details>
+
 ### `mock`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact mock --help
@@ -404,7 +427,12 @@ Options:
 
 ```
 
+</details>
+
 ### `verifier`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact verifier --help
@@ -530,7 +558,12 @@ Development options:
 
 ```
 
+</details>
+
 ### `stub`
+
+<details>
+<summary>Show help</summary>
 
 ```console
 $ pact stub --help
@@ -597,6 +630,8 @@ Options:
           Print help
 
 ```
+
+</details>
 
 ## Open Telemetry
 
