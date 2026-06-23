@@ -14,57 +14,63 @@ A consolidated cli consisting of all Pact command line tools
 
 ### Supported Platforms
 
-| OS            | Architecture | Supported  |
-| ------------- | ------------ | ---------  |
-| MacOS         | x86_64       | ✅         |
-| MacOS         | arm64        | ✅         |
-| Linux (libc)  | x86_64       | ✅         |
-| Linux (libc)  | arm64        | ✅         |
-| Linux (musl)  | x86_64       | ✅         |
-| Linux (musl)  | arm64        | ✅         |
-| Windows       | x86_64       | ✅         |
-| Windows       | arm64        | ✅         |
+Pre-built binaries are published for the following targets on every
+[release](https://github.com/pact-foundation/pact-cli/releases). The install
+scripts, the [GitHub Action](#github-action) and the [Docker](#docker) images
+all download these same binaries.
+
+| OS              | Architecture | Target triple                | Supported |
+| --------------- | ------------ | ---------------------------- | --------- |
+| macOS           | x86_64       | `x86_64-apple-darwin`        | ✅        |
+| macOS           | arm64        | `aarch64-apple-darwin`       | ✅        |
+| Linux (glibc)   | x86_64       | `x86_64-unknown-linux-gnu`   | ✅        |
+| Linux (glibc)   | arm64        | `aarch64-unknown-linux-gnu`  | ✅        |
+| Linux (musl)    | x86_64       | `x86_64-unknown-linux-musl`  | ✅        |
+| Linux (musl)    | arm64        | `aarch64-unknown-linux-musl` | ✅        |
+| Windows         | x86_64       | `x86_64-pc-windows-msvc`     | ✅        |
+| Windows         | arm64        | `aarch64-pc-windows-msvc`    | 🚧        |
+| BSD (via musl)  | x86_64       | `x86_64-unknown-linux-musl`  | ✅        |
+| BSD (via musl)  | arm64        | `aarch64-unknown-linux-musl` | ✅        |
+
+🚧 Windows on arm64 is not yet published while upstream
+[`ring` arm64 Windows support](https://github.com/briansmith/ring/pull/2803)
+lands.
+
+FreeBSD, OpenBSD and NetBSD have no native target; download the Linux musl
+binary for your architecture and run it under the host's Linux compatibility
+layer.
 
 ### Install
 
-Aliased 1-liner to the install scripts
+We recommend the installer for your platform — it downloads the pre-built
+binary for the [latest release](https://github.com/pact-foundation/pact-cli/releases)
+and adds it to your `PATH`. These installers are generated and distributed by
+cargo-dist.
 
-* *nix users (including Windows users running WSL/msys2/mingw):
-  * `curl -fsSL https://lin.get-pact.saf.dev | sh`
-* Powershell (windows): `
-  * `iwr -useb https://win.get-pact.saf.dev | iex`
-
-Unix systems
+#### Shell (Unix)
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.sh | sh
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://github.com/pact-foundation/pact-cli/releases/latest/download/pact-installer.sh | sh
 ```
+
+To install a specific version, swap `latest/download` for `download/<VERSION>`:
 
 ```sh
-wget -q https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.sh -O- | sh
+curl --proto '=https' --tlsv1.2 -LsSf \
+  https://github.com/pact-foundation/pact-cli/releases/download/<VERSION>/pact-installer.sh | sh
 ```
 
-install fixed version - pass `PACT_CLI_VERSION=v<PACT_CLI_VERSION>` eg `PACT_CLI_VERSION=v0.0.1` or set as an env var
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.sh | PACT_CLI_VERSION=v0.0.1 sh
-```
-
-```sh
-wget -q https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.sh -O- | PACT_CLI_VERSION=v0.0.1 sh
-```
-
-Windows (Powershell)
+#### PowerShell (Windows)
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.ps1 | iex
+powershell -ExecutionPolicy ByPass -c "irm https://github.com/pact-foundation/pact-cli/releases/latest/download/pact-installer.ps1 | iex"
 ```
 
-To install a specific version, set the `PACT_CLI_VERSION` environment variable before running the script:
+To install a specific version:
 
 ```powershell
-$env:PACT_CLI_VERSION = "v0.0.1"
-iwr -useb https://raw.githubusercontent.com/pact-foundation/pact-cli/main/install.ps1 | iex
+powershell -ExecutionPolicy ByPass -c "irm https://github.com/pact-foundation/pact-cli/releases/download/<VERSION>/pact-installer.ps1 | iex"
 ```
 
 ### Standalone executable
@@ -73,45 +79,53 @@ Download the latest binary release for your required platform, from the [release
 
 ### Cargo
 
+The fastest install from the Cargo ecosystem uses
+[cargo-binstall](https://github.com/cargo-bins/cargo-binstall), which fetches
+the cargo-dist release binaries where available and falls back to a source
+build otherwise:
+
+```sh
+cargo binstall pact
+# or a specific version
+cargo binstall pact --version <VERSION>
+```
+
+If you do not have `cargo-binstall`, build and install from source:
+
 ```sh
 cargo install pact --locked
 ```
 
-To install a specific version using Cargo:
-
-```sh
-cargo install pact --locked --version <VERSION>
-```
-
 ### GitHub Action
 
-An action is available at `pact-foundation/pact-cli@<tag>`
-
-Example
+An action is available at `pact-foundation/pact-cli`. Pin the version via the
+action ref:
 
 ```yml
-    - uses: pact-foundation/pact-cli@main
- 
+    - uses: pact-foundation/pact-cli@vX.Y.Z
+
     - name: Show help commands
       run: |
         pact --help
 ```
 
+To always use the latest release, reference `@main` (not recommended for
+production workflows).
+
 ### Docker
 
-2 images are available
+We publish both Alpine and Debian images, with tags of the form:
 
-* alpine (default)
-* debian
+- `<version>`
+- `<version>-alpine`
+- `<version>-debian`
 
-tags format
+To always pull the latest version, replace `<version>` with `latest`.
 
-* `latest`
-* `latest-alpine`
-* `latest-debian`
-* `<version>`
-* `<version>-alpine`
-* `<version>-debian`
+Our images are hosted on both DockerHub and GitHub Container Registry:
+
+- [DockerHub](https://hub.docker.com/r/pactfoundation/pact)
+- [GitHub Container Registry](https://ghcr.io/pact-foundation/pact)
 
 ## Commands
 
