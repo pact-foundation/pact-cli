@@ -209,7 +209,7 @@ The extension system provides intelligent version tracking:
 
 ```yaml
 # GitHub Actions example
-- uses: `pact-foundation`/pact-cli@main
+- uses: pact-foundation/pact-cli@vX.Y.Z
 - name: Install Pact Extensions
   run: |
     pact extension install pactflow-ai
