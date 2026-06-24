@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
     - uses: you54f/pact-broker-in-a-box@32b14f7a159719ef997e651d02e393349ed553ab # main
-    - uses: pact-foundation/pact-cli@bc95b59508b3a6cb8403476c23e06f929bffd93e # main
+    - uses: pact-foundation/pact-cli@39c1e7c97fb652e06a69bd21b38bf49727562f2e # main
  
     - name: Show help commands
       run: |
