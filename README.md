@@ -2,7 +2,7 @@
 
 [![Test and Release](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml)
 
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=<PIXEL_UUID>&page=README.md" />
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=1f85a25f-a4e2-4e85-8c36-9d8635f23162&page=README.md" />
 
 A consolidated cli consisting of all Pact command line tools
 
