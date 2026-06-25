@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Docs
+
+- Add Scarf analytics pixel to README and document telemetry / opt-out (PACT-6978)
+
 ## [0.9.0] - 2025-10-25
 
 ### Features

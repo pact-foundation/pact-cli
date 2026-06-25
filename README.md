@@ -2,6 +2,8 @@
 
 [![Test and Release](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml)
 
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=1f85a25f-a4e2-4e85-8c36-9d8635f23162&page=README.md" />
+
 A consolidated cli consisting of all Pact command line tools
 
 * [pact_mock_server_cli](https://github.com/pact-foundation/pact-core-mock-server/tree/main/pact_mock_server_cli)
@@ -760,6 +762,12 @@ or
 
 * Twitter: @pact_up
 * Stack Overflow: stackoverflow.com/questions/tagged/pact
+
+## Anonymized analytics
+
+`pact-cli` uses [Scarf](https://scarf.sh/) to collect [anonymized README impression analytics](https://about.scarf.sh/about). These analytics help support the maintainers of this project and ONLY run when this README is viewed (a 1x1 pixel served from `static.scarf.sh`). To opt out, block `static.scarf.sh` at the network level, or disable image loading in your browser when viewing this README.
+
+For more information, see [docs.pact.io/telemetry](https://docs.pact.io/telemetry).
 
 ## Licensing
 
