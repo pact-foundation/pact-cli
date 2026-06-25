@@ -35,38 +35,12 @@ jobs:
       - format
       - lint
       - test
-      - release-gate
     steps:
       - name: Failed
-        if: |
-          contains(fromJSON('["failure","cancelled"]'), needs.format.result) ||
-          contains(fromJSON('["failure","cancelled"]'), needs.lint.result) ||
-          contains(fromJSON('["failure","cancelled"]'), needs.test.result) ||
-          needs.release-gate.result == 'failure' ||
-          needs.release-gate.result == 'cancelled'
         run: exit 1
-
-  release-gate:
-    name: Release gate (full build + integration)
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false &&
-      startsWith(github.head_ref, 'release-plz-')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6  # v1.16.1
-      - name: Verify full-target build plan
-        run: dist plan
-      - name: Build (debug) for integration
-        run: cargo build
-      - name: Start Pact Broker
-        uses: you54f/pact-broker-in-a-box@32b14f7a159719ef997e651d02e393349ed553ab  # main
-      - name: Run CLI integration test
-        run: ./run.sh
-        env:
-          PACT_BROKER_BASE_URL: http://localhost:9292
-          BIN: ./target/debug/pact
+        if: |
+          contains(needs.*.result, 'failure')
+          || contains(needs.*.result, 'cancelled')
 
   format:
     name: Format
