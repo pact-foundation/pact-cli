@@ -1,3 +1,23 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.10.3] _2026-06-25_
+
+### 🎨 Styling
+
+-   Fix rustfmt and clippy warnings
+
+### 📚 Documentation
+
+-   Rewrite the installation section
+-   Collapse help output behind details blocks
+-   Enable Scarf telemetry pixel for pact-cli (PACT-7007) ([#86](https://github.com/pact-foundation/pact-cli/issues/86))
+
+### 🛠️ Miscellaneous Tasks
+
+-   Add cargo-dist and release-plz pipeline
+
 ## [Unreleased]
 
 ### Docs
