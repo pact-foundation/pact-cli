@@ -2,6 +2,8 @@
 
 [![Test and Release](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/pact-foundation/pact-cli/actions/workflows/test.yml)
 
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=<PIXEL_UUID>&page=README.md" />
+
 A consolidated cli consisting of all Pact command line tools
 
 * [pact_mock_server_cli](https://github.com/pact-foundation/pact-core-mock-server/tree/main/pact_mock_server_cli)
@@ -760,6 +762,19 @@ or
 
 * Twitter: @pact_up
 * Stack Overflow: stackoverflow.com/questions/tagged/pact
+
+## Anonymized analytics
+
+`pact-cli` uses [Scarf](https://scarf.sh) to collect [anonymized usage analytics](https://about.scarf.sh/about). These analytics help support the maintainers of this project. Two signals are collected:
+
+1. Installer downloads routed through the Scarf GitHub Releases gateway (only if you install via the gateway URL — downloading the installer directly from github.com bypasses this).
+2. README impressions, via a 1x1 pixel served from `static.scarf.sh` when this README is viewed.
+
+No personally identifiable information is collected.
+
+To opt out of install-event analytics, download the installer or pre-built binary directly from the [GitHub Releases page](https://github.com/pact-foundation/pact-cli/releases).
+
+To opt out of README impression tracking, disable image loading in your browser or block `static.scarf.sh` at the network level.
 
 ## Licensing
 
