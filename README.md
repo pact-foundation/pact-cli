@@ -53,26 +53,26 @@ cargo-dist.
 
 ```sh
 curl --proto '=https' --tlsv1.2 -LsSf \
-  https://github.com/pact-foundation/pact-cli/releases/latest/download/pact-installer.sh | sh
+  https://d.pactflow.io/pact/install.sh | sh
 ```
 
 To install a specific version, swap `latest/download` for `download/<VERSION>`:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -LsSf \
-  https://github.com/pact-foundation/pact-cli/releases/download/<VERSION>/pact-installer.sh | sh
+  https://d.pactflow.io/pact/<VERSION>/install.sh | sh
 ```
 
 #### PowerShell (Windows)
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://github.com/pact-foundation/pact-cli/releases/latest/download/pact-installer.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://d.pactflow.io/pact/install.ps1 | iex"
 ```
 
 To install a specific version:
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://github.com/pact-foundation/pact-cli/releases/download/<VERSION>/pact-installer.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://d.pactflow.io/pact/<VERSION>/install.ps1 | iex"
 ```
 
 ### Standalone executable
