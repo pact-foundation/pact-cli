@@ -299,13 +299,13 @@ jobs:
     needs:
       - plan
       - announce
-    permissions:
-      contents: read
-      packages: write
     uses: ./.github/workflows/publish-containers.yml
     with:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit
+    permissions:
+      "contents": "read"
+      "packages": "write"
 
   custom-notify-homebrew:
     needs:
