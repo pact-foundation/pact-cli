@@ -87,7 +87,6 @@ codegen-units = 1
 [workspace.metadata.dist]
 cargo-dist-version = "0.32.0"
 ci = "github"
-allow-dirty = ["ci"]
 installers = ["shell", "powershell"]
 targets = [
   "aarch64-apple-darwin",
@@ -102,6 +101,7 @@ targets = [
 ]
 install-path = "~/.pact/bin"
 post-announce-jobs = ["./publish-containers", "./notify-homebrew"]
+github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" } }
 
 [profile.dist]
 inherits = "release"
