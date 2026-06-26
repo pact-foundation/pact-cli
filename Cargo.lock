@@ -1851,6 +1851,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b4baf93f58d4425749ca49a51c50ebab072c5df6994d08fed93541c331481dc"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2783,9 +2792,9 @@ dependencies = [
 
 [[package]]
 name = "pact-broker-cli"
-version = "0.7.1"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02174a228da2bf81d7c918d139efc8ea1928b17ffa903d3fd412ef2071afc4f6"
+checksum = "f39ec4ee767db86e59870e8e3b49f8c32e2d060dfd800bf8ea0ca59e790c280d"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2798,7 +2807,7 @@ dependencies = [
  "glob",
  "http",
  "httpdate",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "log",
  "maplit",
  "mime",
@@ -2806,7 +2815,6 @@ dependencies = [
  "opentelemetry-appender-tracing",
  "opentelemetry-http",
  "opentelemetry-otlp",
- "opentelemetry-semantic-conventions",
  "opentelemetry-stdout",
  "opentelemetry_sdk",
  "pact_models",
@@ -2821,9 +2829,6 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
- "tracing-appender",
- "tracing-core",
- "tracing-log",
  "tracing-opentelemetry",
  "tracing-subscriber",
  "url",
@@ -3913,7 +3918,6 @@ dependencies = [
  "pin-project-lite",
  "quinn",
  "rustls",
- "rustls-native-certs",
  "rustls-pki-types",
  "rustls-platform-verifier",
  "serde",
