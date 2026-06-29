@@ -2792,9 +2792,9 @@ dependencies = [
 
 [[package]]
 name = "pact-broker-cli"
-version = "0.8.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f39ec4ee767db86e59870e8e3b49f8c32e2d060dfd800bf8ea0ca59e790c280d"
+checksum = "5886fc66adc8f791dddf0952943cccc04bb326476cb5cab77c4a23ca9eb329f5"
 dependencies = [
  "anyhow",
  "async-trait",

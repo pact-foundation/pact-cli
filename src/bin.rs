@@ -203,7 +203,7 @@ pub fn main() -> ExitCode {
                 }
 
                 // Regular pactflow handling
-                match pact_broker_cli::cli::pactflow_client::run(args, std::env::args().collect()) {
+                match pact_broker_cli::cli::pactflow_client::run(args) {
                     Ok(_) => {
                         capture_telemetry(&std::env::args().collect::<Vec<_>>(), 0, None);
                         Ok(())
