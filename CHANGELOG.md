@@ -20,6 +20,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.4] _2026-06-29_
+
+### 🛠️ Miscellaneous Tasks
+
+-   Update distribution links ([#88](https://github.com/pact-foundation/pact-cli/issues/88))
+-   _(ci)_ Fix container job permissions
+-   _(pact-broker-cli)_ Remove deprecated arg from pactflow client
+
+
 ### Docs
 
 - Add Scarf analytics pixel to README and document telemetry / opt-out (PACT-6978)
