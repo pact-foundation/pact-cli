@@ -1,12 +1,14 @@
+#:tombi toml-version = "v1.0.0"
+
 [package]
 name = "pact"
 version = "0.10.4"
-authors = ["Yousaf Nabi <you@saf.dev>"]
 edition = "2021"
 description = "Pact consolidated CLI - pact_core_mock_server, pact_verifier, pact-stub-server, pact-plugin-cli, pact-broker-cli in a single binary"
+readme = "README.md"
 homepage = "https://www.pact.io"
 repository = "https://github.com/pact-foundation/pact-cli"
-readme = "README.md"
+license = "MIT"
 keywords = [
   "pact-broker-client",
   "pact-mock-server",
@@ -14,7 +16,6 @@ keywords = [
   "pact-stub-server",
   "pact-verifier"
 ]
-license = "MIT"
 include = [
   "/README.md",
   "CHANGELOG.md",
@@ -25,6 +26,29 @@ include = [
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.metadata.dist]
+cargo-dist-version = "0.32.0"
+ci = "github"
+installers = ["shell", "powershell"]
+targets = [
+  "aarch64-apple-darwin",
+  # Waiting for https://github.com/briansmith/ring/pull/2803 to be released
+  # "aarch64-pc-windows-msvc",
+  "aarch64-unknown-linux-gnu",
+  "aarch64-unknown-linux-musl",
+  "x86_64-apple-darwin",
+  "x86_64-pc-windows-msvc",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-unknown-linux-musl",
+]
+install-path = "~/.pact/bin"
+post-announce-jobs = [
+  "./publish-containers",
+  "./notify-homebrew",
+  "./legacy-artifacts"
+]
+github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" }, legacy-artifacts = { contents = "write" } }
 
 [[bin]]
 name = "pact"
@@ -76,32 +100,6 @@ tracing-subscriber = { version = "0.3.20", features = [
 
 [dev-dependencies]
 trycmd = "=1.2.0"
-
-[profile.release]
-opt-level = "z"  # Optimize for size.
-strip = true  # Automatically strip symbols from the binary.
-lto = true
-panic = "abort"
-codegen-units = 1
-
-[workspace.metadata.dist]
-cargo-dist-version = "0.32.0"
-ci = "github"
-installers = ["shell", "powershell"]
-targets = [
-  "aarch64-apple-darwin",
-  # Waiting for https://github.com/briansmith/ring/pull/2803 to be released
-  # "aarch64-pc-windows-msvc",
-  "aarch64-unknown-linux-gnu",
-  "aarch64-unknown-linux-musl",
-  "x86_64-apple-darwin",
-  "x86_64-pc-windows-msvc",
-  "x86_64-unknown-linux-gnu",
-  "x86_64-unknown-linux-musl",
-]
-install-path = "~/.pact/bin"
-post-announce-jobs = ["./publish-containers", "./notify-homebrew"]
-github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" } }
 
 [profile.dist]
 inherits = "release"
