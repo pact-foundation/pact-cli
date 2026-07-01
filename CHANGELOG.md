@@ -20,6 +20,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.5] _2026-07-01_
+
+### 🛠️ Miscellaneous Tasks
+
+-   _(ci)_ Add legacy-artifact publishing job
+
+
 ## [0.10.4] _2026-06-29_
 
 ### 🛠️ Miscellaneous Tasks
