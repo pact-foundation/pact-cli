@@ -73,13 +73,7 @@ impl PlatformInfo {
             ("windows", "x86_64") => "x86_64-pc-windows-msvc",
             ("linux", "aarch64") => "aarch64-unknown-linux-gnu",
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu",
-            _ => {
-                eprintln!(
-                    "Unsupported OS and architecture combination: os={}, arch={}",
-                    self.os, self.arch
-                );
-                std::process::exit(1);
-            }
+            _ => "x86_64-unknown-linux-gnu", // fallback
         };
 
         format!("https://download.pactflow.io/ai/dist/{}/latest", target)
@@ -93,13 +87,7 @@ impl PlatformInfo {
             ("windows", "x86_64") => "x86_64-pc-windows-msvc",
             ("linux", "aarch64") => "aarch64-unknown-linux-gnu",
             ("linux", "x86_64") => "x86_64-unknown-linux-gnu",
-            _ => {
-                eprintln!(
-                    "Unsupported OS and architecture combination: os={}, arch={}",
-                    self.os, self.arch
-                );
-                std::process::exit(1);
-            }
+            _ => "x86_64-unknown-linux-gnu", // fallback
         };
 
         format!(
@@ -114,17 +102,11 @@ impl PlatformInfo {
         let target = match (self.os.as_str(), self.arch.as_str()) {
             ("darwin", "aarch64") => "macos-aarch64",
             ("darwin", "x86_64") => "macos-x86_64",
-            ("windows", "aarch64") => "windows-x86_64", // no arm64 support, rely on prism
+            ("windows", "aarch64") => "windows-aarch64",
             ("windows", "x86_64") => "windows-x86_64",
             ("linux", "aarch64") => "linux-aarch64",
             ("linux", "x86_64") => "linux-x86_64",
-            _ => {
-                eprintln!(
-                    "Unsupported OS and architecture combination: os={}, arch={}",
-                    self.os, self.arch
-                );
-                std::process::exit(1);
-            }
+            _ => "linux-x86_64", // fallback
         };
 
         format!(
@@ -137,17 +119,11 @@ impl PlatformInfo {
         match (self.os.as_str(), self.arch.as_str()) {
             ("darwin", "aarch64") => "osx-arm64",
             ("darwin", "x86_64") => "osx-x86_64",
-            ("windows", "aarch64") => "windows-aarch64", // Windows arm64 not available
+            ("windows", "aarch64") => "windows-x86_64", // Windows arm64 not available
             ("windows", "x86_64") => "windows-x86_64",
             ("linux", "aarch64") => "linux-arm64",
             ("linux", "x86_64") => "linux-x86_64",
-            _ => {
-                eprintln!(
-                    "Unsupported OS and architecture combination: os={}, arch={}",
-                    self.os, self.arch
-                );
-                std::process::exit(1);
-            }
+            _ => "linux-x86_64", // fallback
         }
         .to_string()
     }
@@ -229,7 +205,6 @@ impl ExtensionManager {
     pub fn save_config(&self, config: &HashMap<String, ExtensionConfig>) -> std::io::Result<()> {
         let config_path = self.get_extension_config_path();
         let json = serde_json::to_string_pretty(config)?;
-        self.ensure_extensions_dir()?;
         fs::write(config_path, json)
     }
 
@@ -383,7 +358,7 @@ impl ExtensionManager {
 
         // Extract archive to ~/.drift
         println!("🚀 Extracting drift...");
-        Self::extract_drift_archive_to(&archive_path, &self.drift_home)?;
+        Self::extract_drift_archive_to(&archive_path, &self.drift_home, &self.platform)?;
 
         // Clean up archive
         fs::remove_file(&archive_path)?;
@@ -542,8 +517,8 @@ impl ExtensionManager {
                     let version_output = String::from_utf8_lossy(&output.stdout);
                     println!("{version_output}");
                     // Parse version from output like "Drift testing tools 2603.0.1-beta"
-                    if let Some(version) = version_output.split_whitespace().nth(3) {
-                        return Ok(version.to_string());
+                    if !version_output.is_empty() {
+                        return Ok(version_output.to_string());
                     }
                 }
             }
@@ -589,17 +564,35 @@ impl ExtensionManager {
     fn extract_drift_archive_to(
         archive_path: &str,
         extract_dir: &str,
+        platform: &PlatformInfo,
     ) -> Result<(), Box<dyn std::error::Error>> {
         fs::create_dir_all(extract_dir)?;
-        let status = Cmd::new("tar")
-            .arg("-xzf")
-            .arg(archive_path)
-            .arg("-C")
-            .arg(extract_dir)
-            .status()?;
 
-        if !status.success() {
-            return Err("Failed to extract tar archive".into());
+        if platform.os == "windows" {
+            // Use PowerShell for Windows
+            let status = Cmd::new("powershell")
+                .arg("-Command")
+                .arg(format!(
+                    "Expand-Archive -Path '{}' -DestinationPath '{}' -Force",
+                    archive_path, extract_dir
+                ))
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract Windows archive".into());
+            }
+        } else {
+            // Use tar for Unix systems
+            let status = Cmd::new("tar")
+                .arg("-xzf")
+                .arg(archive_path)
+                .arg("-C")
+                .arg(extract_dir)
+                .status()?;
+
+            if !status.success() {
+                return Err("Failed to extract tar archive".into());
+            }
         }
 
         Ok(())
