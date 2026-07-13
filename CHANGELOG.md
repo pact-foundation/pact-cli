@@ -2,44 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-
 ## [0.10.6] _2026-07-13_
 
 ### 🚀 Features
 
--   Add drift extension
+- Add drift extension
 
 ### 🛠️ Miscellaneous Tasks
 
--   _(docs)_ Correct changelog
--   _(drift)_ Install to ~/.drift
--   Cargo fmt
--   _(drift)_ Win-arm64 no bins, ensure config dir exists
--   Exit early if extension has unsupported plat/arch
--   _(drift)_ Minor fixups
--   _(drift)_ Clippy fixup
-
+- _(docs)_ Correct changelog
+- _(drift)_ Install to ~/.drift
+- Cargo fmt
+- _(drift)_ Win-arm64 no bins, ensure config dir exists
+- Exit early if extension has unsupported plat/arch
+- _(drift)_ Minor fixups
+- _(drift)_ Clippy fixup
 
 ## [0.10.5] _2026-07-01_
 
 ### 🛠️ Miscellaneous Tasks
 
--   _(ci)_ Add legacy-artifact publishing job
-
+- _(ci)_ Add legacy-artifact publishing job
 
 ## [0.10.4] _2026-06-29_
 
 ### 🛠️ Miscellaneous Tasks
 
--   Update distribution links ([#88](https://github.com/pact-foundation/pact-cli/issues/88))
--   _(ci)_ Fix container job permissions
--   _(pact-broker-cli)_ Remove deprecated arg from pactflow client
-
+- Update distribution links ([#88](https://github.com/pact-foundation/pact-cli/issues/88))
+- _(ci)_ Fix container job permissions
+- _(pact-broker-cli)_ Remove deprecated arg from pactflow client
 
 ### Docs
 
@@ -49,17 +40,17 @@ All notable changes to this project will be documented in this file.
 
 ### 🎨 Styling
 
--   Fix rustfmt and clippy warnings
+- Fix rustfmt and clippy warnings
 
 ### 📚 Documentation
 
--   Rewrite the installation section
--   Collapse help output behind details blocks
--   Enable Scarf telemetry pixel for pact-cli (PACT-7007) ([#86](https://github.com/pact-foundation/pact-cli/issues/86))
+- Rewrite the installation section
+- Collapse help output behind details blocks
+- Enable Scarf telemetry pixel for pact-cli (PACT-7007) ([#86](https://github.com/pact-foundation/pact-cli/issues/86))
 
 ### 🛠️ Miscellaneous Tasks
 
--   Add cargo-dist and release-plz pipeline
+- Add cargo-dist and release-plz pipeline
 
 ## [0.10.2] - 2026-06-02
 
@@ -109,7 +100,6 @@ All notable changes to this project will be documented in this file.
 
 - Update rust crate pact-broker-cli to v0.6.1 ([#33](https://github.com/orhun/git-cliff/issues/33))
 
-
 ## [0.9.2] - 2026-02-11
 
 ### Bug Fixes
@@ -119,9 +109,9 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Update rust crate clap to v4.5.57 ([#12](https://github.com/orhun/git-cliff/issues/12)) [skip ci]
-- Update rust crate clap_complete to v4.5.65 ([#13](https://github.com/orhun/git-cliff/issues/13))  [skip ci]
-- Update rust crate comfy-table to v7.2.2 ([#15](https://github.com/orhun/git-cliff/issues/15))  [skip ci]
-- Update rust crate serde_json to v1.0.149 ([#16](https://github.com/orhun/git-cliff/issues/16))  [skip ci]
+- Update rust crate clap_complete to v4.5.65 ([#13](https://github.com/orhun/git-cliff/issues/13)) [skip ci]
+- Update rust crate comfy-table to v7.2.2 ([#15](https://github.com/orhun/git-cliff/issues/15)) [skip ci]
+- Update rust crate serde_json to v1.0.149 ([#16](https://github.com/orhun/git-cliff/issues/16)) [skip ci]
 - Update rust crate tracing-opentelemetry to v0.32.1 ([#18](https://github.com/orhun/git-cliff/issues/18)) [skip ci]
 - Update rust crate trycmd to v0.15.11 ([#19](https://github.com/orhun/git-cliff/issues/19)) [skip ci]
 
