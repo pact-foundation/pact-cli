@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.10.6] _2026-07-13_
+
+### 🚀 Features
+
+-   Add drift extension
+
+### 🛠️ Miscellaneous Tasks
+
+-   _(docs)_ Correct changelog
+-   _(drift)_ Install to ~/.drift
+-   Cargo fmt
+-   _(drift)_ Win-arm64 no bins, ensure config dir exists
+-   Exit early if extension has unsupported plat/arch
+-   _(drift)_ Minor fixups
+-   _(drift)_ Clippy fixup
+
+
 ## [0.10.5] _2026-07-01_
 
 ### 🛠️ Miscellaneous Tasks
