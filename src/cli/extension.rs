@@ -96,7 +96,7 @@ impl PlatformInfo {
         )
     }
     pub fn get_drift_url(&self) -> String {
-        format!("https://download.pactflow.io/drift/version.txt")
+        "https://download.pactflow.io/drift/version.txt".to_string()
     }
     pub fn get_drift_download_url(&self, version: &str) -> String {
         let target = match (self.os.as_str(), self.arch.as_str()) {
