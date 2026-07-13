@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
 
 ## [0.10.6] _2026-07-13_
 
