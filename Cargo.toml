@@ -99,7 +99,7 @@ tracing-subscriber = { version = "0.3.20", features = [
 ] }
 
 [dev-dependencies]
-trycmd = "=1.2.0"
+trycmd = "=1.2.1"
 
 [profile.dist]
 inherits = "release"
