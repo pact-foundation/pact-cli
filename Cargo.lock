@@ -635,6 +635,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "comfy-table"
+version = "8.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "136c8c4c3823846e8ba6d4bda011b4e5d5827b8bb0ac26c31f9ab31abe9f54f2"
+dependencies = [
+ "crossterm 0.29.0",
+ "unicode-segmentation",
+ "unicode-width 0.2.2",
+]
+
+[[package]]
 name = "compression-codecs"
 version = "0.4.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2761,7 +2772,7 @@ version = "0.10.7"
 dependencies = [
  "clap",
  "clap_complete",
- "comfy-table",
+ "comfy-table 8.0.0",
  "home",
  "opentelemetry",
  "opentelemetry-appender-tracing",
@@ -2799,7 +2810,7 @@ dependencies = [
  "base64",
  "clap",
  "clap_complete",
- "comfy-table",
+ "comfy-table 7.2.2",
  "console",
  "futures",
  "glob",
@@ -2843,7 +2854,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
- "comfy-table",
+ "comfy-table 7.2.2",
  "home",
  "itertools 0.13.0",
  "pact-plugin-driver 0.7.6",
@@ -3068,7 +3079,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "clap",
- "comfy-table",
+ "comfy-table 7.2.2",
  "http",
  "hyper",
  "hyper-util",

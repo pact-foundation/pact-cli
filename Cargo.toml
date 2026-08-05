@@ -57,7 +57,7 @@ path = "src/bin.rs"
 [dependencies]
 clap = { version = "4.5.51", features = ["cargo", "derive", "env"] }
 clap_complete = { version = "4.5.1", features = [] }
-comfy-table = "7.2.1"
+comfy-table = "8.0.0"
 home = "0.5.5"
 reqwest = { version = "0.13", features = ["json"] }
 reqwest-middleware = "0.5"
