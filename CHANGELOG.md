@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.8] _2026-08-10_
+
+### 📚 Documentation
+
+- Fix minor changelog issue
+- Add missing 0.10.7 changelog
+
+
 ## [0.10.7] _2026-07-13_
 
 ### 🛠️ Miscellaneous Tasks
