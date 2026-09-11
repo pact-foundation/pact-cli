@@ -2937,13 +2937,13 @@ dependencies = [
 
 [[package]]
 name = "pact-broker-cli"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62545240ec1f782fa0afc53f7f22ddd9de0dc8e5a4f4126480518f66a2512fcc"
+checksum = "7cff607d4feef790caffe358432bcd2a1fb0a8879311f05fbeff7d6b11bc9f41"
 dependencies = [
  "anyhow",
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "clap",
  "clap_complete",
  "comfy-table 7.2.2",
@@ -5036,7 +5036,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
