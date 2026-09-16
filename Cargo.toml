@@ -55,20 +55,20 @@ name = "pact"
 path = "src/bin.rs"
 
 [dependencies]
-clap = { version = "4.5.51", features = ["cargo", "derive", "env"] }
-clap_complete = { version = "4.5.1", features = [] }
+clap = { version = "4.6.7", features = ["cargo", "derive", "env"] }
+clap_complete = { version = "4.6.11", features = [] }
 comfy-table = "8.0.0"
-home = "0.5.5"
+home = "0.5.12"
 reqwest = { version = "0.13", features = ["json"] }
-reqwest-middleware = "0.5"
-reqwest-retry = "0.9"
+reqwest-middleware = "0.5.2"
+reqwest-retry = "0.9.1"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 
 ## Pact CLI components
-pact-broker-cli = "=0.8.6"
+pact-broker-cli = "=0.8.8"
 pact_mock_server_cli = "=2.0.0"
-pact-plugin-cli = "=0.2.0"
+pact-plugin-cli = "=0.3.0"
 pact-stub-server = "=0.7.1"
 pact_verifier_cli = "=1.3.5"
 
@@ -88,10 +88,10 @@ opentelemetry-stdout = { version = "0.32.0", features = ["logs", "trace"] }
 reqwest-tracing = { version = "0.7.0", features = [
   "opentelemetry_0_32",
 ] }
-tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread", "time"] }
-tracing = { version = "0.1.41", features = ["std"] }
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "time"] }
+tracing = { version = "0.1.44", features = ["std"] }
 tracing-opentelemetry = "0.33.0"
-tracing-subscriber = { version = "0.3.20", features = [
+tracing-subscriber = { version = "0.3.23", features = [
   "env-filter",
   "fmt",
   "registry",
