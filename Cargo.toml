@@ -73,18 +73,18 @@ pact-stub-server = "=0.7.1"
 pact_verifier_cli = "=1.3.5"
 
 ## Otel
-opentelemetry = "0.32.0"
-opentelemetry-appender-tracing = "0.32.0"
-opentelemetry-http = "0.32.0"
-opentelemetry-otlp = { version = "0.32.0", features = [
+opentelemetry = "0.33.0"
+opentelemetry-appender-tracing = "0.33.0"
+opentelemetry-http = "0.33.0"
+opentelemetry-otlp = { version = "0.33.0", features = [
   "logs",
   "tls",
   "tls-roots",
   "trace"
 ] }
-opentelemetry_sdk = "0.32.0"
-opentelemetry-semantic-conventions = "0.32.0"
-opentelemetry-stdout = { version = "0.32.0", features = ["logs", "trace"] }
+opentelemetry_sdk = "0.33.0"
+opentelemetry-semantic-conventions = "0.33.0"
+opentelemetry-stdout = { version = "0.33.0", features = ["logs", "trace"] }
 reqwest-tracing = { version = "0.7.0", features = [
   "opentelemetry_0_32",
 ] }
