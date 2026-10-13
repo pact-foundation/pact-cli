@@ -90,7 +90,7 @@ reqwest-tracing = { version = "0.7.0", features = [
 ] }
 tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "time"] }
 tracing = { version = "0.1.44", features = ["std"] }
-tracing-opentelemetry = "0.33.0"
+tracing-opentelemetry = "0.34.0"
 tracing-subscriber = { version = "0.3.23", features = [
   "env-filter",
   "fmt",
