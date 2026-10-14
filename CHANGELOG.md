@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.9] _2026-10-14_
+
+### 🧩 Bundled CLIs
+
+- _(deps)_ Update rust crate pact-plugin-cli to [v0.3.1](https://github.com/pact-foundation/pact-plugins/releases/tag/pact-plugin-cli-v0.3.1) ([#150](https://github.com/pact-foundation/pact-cli/issues/150))
+- _(deps)_ Update rust crate pact-broker-cli to [v0.9.0](https://github.com/pact-foundation/pact-broker-cli/releases/tag/v0.9.0) ([#155](https://github.com/pact-foundation/pact-cli/issues/155))
+
+
 ## [0.10.8] _2026-09-16_
 
 ### 📚 Documentation
