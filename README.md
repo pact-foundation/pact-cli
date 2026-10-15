@@ -38,6 +38,11 @@ all download these same binaries.
 [`ring` arm64 Windows support](https://github.com/briansmith/ring/pull/2803)
 lands.
 
+The `pact-python-cli` wheel for Windows on arm64 carries the x86_64 binary,
+which runs under Windows' x64 emulation. Linux with glibc older than 2.34 has
+no matching wheel, so pip falls back to the Ruby-based `pact-python-cli`
+2.6.4.0; use the shell installer or the musl binary instead.
+
 FreeBSD, OpenBSD and NetBSD have no native target; download the Linux musl
 binary for your architecture and run it under the host's Linux compatibility
 layer.
@@ -74,6 +79,22 @@ To install a specific version:
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://d.pactflow.io/pact/<VERSION>/install.ps1 | iex"
 ```
+
+#### Python (pip / uv)
+
+The [`pact-python-cli`](https://pypi.org/project/pact-python-cli/) package
+ships the same binaries as wheels:
+
+```sh
+pip install pact-python-cli
+# or, to put `pact` on your PATH outside any virtual environment
+uv tool install pact-python-cli
+```
+
+`pact-python-cli` 2.x shipped the Ruby standalone tools; pin
+`pact-python-cli<1!0` to stay on them. The
+[Pact Python migration guide](https://github.com/pact-foundation/pact-python/blob/main/MIGRATION.md)
+maps each Ruby command to its `pact` subcommand.
 
 ### Standalone executable
 
