@@ -326,3 +326,15 @@ jobs:
     secrets: inherit
     permissions:
       "contents": "write"
+
+  custom-publish-pypi:
+    needs:
+      - plan
+      - announce
+    uses: ./.github/workflows/publish-pypi.yml
+    with:
+      plan: ${{ needs.plan.outputs.val }}
+    secrets: inherit
+    permissions:
+      "contents": "read"
+      "id-token": "write"

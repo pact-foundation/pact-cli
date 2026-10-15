@@ -46,9 +46,10 @@ install-path = "~/.pact/bin"
 post-announce-jobs = [
   "./publish-containers",
   "./notify-homebrew",
-  "./legacy-artifacts"
+  "./legacy-artifacts",
+  "./publish-pypi"
 ]
-github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" }, legacy-artifacts = { contents = "write" } }
+github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" }, legacy-artifacts = { contents = "write" }, publish-pypi = { contents = "read", id-token = "write" } }
 
 [[bin]]
 name = "pact"
