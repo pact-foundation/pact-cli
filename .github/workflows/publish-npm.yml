@@ -1,0 +1,251 @@
+# Publishes the release binaries to npm as `@pact-foundation/pact-cli` and six
+# platform packages, built by .github/scripts/build-npm.js.
+#
+# Versions map crate `X.Y.Z` to npm `(18+X).Y.Z`; 18.x continues the
+# pact-js-cli line.
+#
+# npm trusted publishing must list both release.yml (which calls this
+# workflow) and publish-npm.yml (for manual runs), with environment `npm`, on
+# all seven packages.
+
+name: Publish npm
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish to npm (e.g. v0.10.9)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      enabled: ${{ steps.version.outputs.enabled }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Resolve version
+        id: version
+        env:
+          PLAN: ${{ inputs.plan }}
+          MANUAL_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$PLAN" ]]; then
+            TAG="$(echo "$PLAN" | jq -r '.announcement_tag')"
+            PRERELEASE="$(echo "$PLAN" | jq -r '.announcement_is_prerelease')"
+          else
+            TAG="$MANUAL_TAG"
+            PRERELEASE=false
+          fi
+
+          if [[ "$PRERELEASE" == "true" || "$TAG" == *-* ]]; then
+            echo "::notice::Skipping npm publish for prerelease ${TAG}"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          IFS=. read -r major minor patch <<< "${TAG#v}"
+          VERSION="$((18 + major)).${minor}.${patch}"
+          {
+            echo "enabled=true"
+            echo "tag=${TAG}"
+            echo "version=${VERSION}"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        if: steps.version.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - name: Download release archives
+        if: steps.version.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/archives"
+          cd "$RUNNER_TEMP/archives"
+          gh release download "$TAG" --repo "${GITHUB_REPOSITORY}" \
+            -p 'pact-*-apple-darwin.tar.xz*' \
+            -p 'pact-*-unknown-linux-musl.tar.xz*' \
+            -p 'pact-*-pc-windows-msvc.zip*'
+          for checksum in *.sha256; do
+            sha256sum --check "$checksum"
+          done
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        if: steps.version.outputs.enabled == 'true'
+        with:
+          node-version: '24'
+
+      - name: Build and pack
+        if: steps.version.outputs.enabled == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p tarballs
+          node .github/scripts/build-npm.js \
+            --version "$VERSION" \
+            --archives "$RUNNER_TEMP/archives" \
+            --wrapper npm/pact-cli \
+            --license LICENSE \
+            --out "$RUNNER_TEMP/packages" > "$RUNNER_TEMP/dirs.txt"
+          # build-npm.js prints the main package last, so publishing in this
+          # order never exposes a main package whose platform packages are absent.
+          while read -r dir; do
+            npm pack "$dir" --silent --pack-destination tarballs >> tarballs/order.txt
+          done < "$RUNNER_TEMP/dirs.txt"
+          cat tarballs/order.txt
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        if: steps.version.outputs.enabled == 'true'
+        with:
+          name: npm-tarballs
+          path: tarballs/
+          if-no-files-found: error
+
+  smoke:
+    name: Smoke test (${{ matrix.package }})
+    needs: build
+    if: needs.build.outputs.enabled == 'true'
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            package: linux-x64
+          - runner: ubuntu-24.04-arm
+            package: linux-arm64
+          - runner: macos-latest
+            package: darwin-arm64
+          - runner: macos-15-intel
+            package: darwin-x64
+          - runner: windows-latest
+            package: windows-x64
+          - runner: windows-11-arm
+            package: windows-arm64
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: npm-tarballs
+          path: tarballs
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '24'
+
+      # Installing the host's platform tarball alongside the main one satisfies
+      # its optional dependency before anything is on the registry.
+      - name: Install and run every bin
+        shell: bash
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+          mkdir proj
+          cd proj
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund \
+            "../tarballs/pact-foundation-pact-cli-$VERSION.tgz" \
+            "../tarballs/pact-foundation-pact-cli-$PACKAGE-$VERSION.tgz"
+          for bin in pact pact-broker pact-mock-server pact-stub-server pact-plugin pact-verifier pactflow; do
+            echo "::group::$bin --help"
+            npx --no-install "$bin" --help
+            echo "::endgroup::"
+          done
+
+  publish:
+    name: Publish to npm
+    needs: [build, smoke]
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@pact-foundation/pact-cli
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts/npm-publish-tag.sh
+            .github/scripts/npm-view.sh
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: npm-tarballs
+          path: tarballs
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm 11.5.1 or later.
+      - name: Install npm
+        run: npm install -g 'npm@^11.5.1'
+
+      - name: Publish
+        run: |
+          set -euo pipefail
+          while read -r tarball; do
+            manifest="$(tar -xOzf "tarballs/$tarball" package/package.json)"
+            name="$(jq -r .name <<< "$manifest")"
+            version="$(jq -r .version <<< "$manifest")"
+            published="$(.github/scripts/npm-view.sh "$name@$version" version)"
+            if [[ -n "$published" ]]; then
+              echo "::notice::$name@$version already published"
+              continue
+            fi
+            latest="$(.github/scripts/npm-view.sh "$name" dist-tags.latest)"
+            tag="$(.github/scripts/npm-publish-tag.sh "$version" "$latest")"
+            echo "Publishing $name@$version with tag $tag (latest was ${latest:-unset})"
+            npm publish "tarballs/$tarball" --access public --provenance --tag "$tag"
+          done < tarballs/order.txt
+
+  verify:
+    name: Verify install from npm
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: '24'
+
+      # The first check that goes through npm's own optionalDependencies
+      # resolution. The registry can lag a publish by a few seconds.
+      - name: Install and run
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/verify"
+          cd "$RUNNER_TEMP/verify"
+          npm init -y > /dev/null
+          for attempt in 1 2 3 4 5; do
+            npm install "@pact-foundation/pact-cli@$VERSION" && break
+            if (( attempt == 5 )); then exit 1; fi
+            sleep 30
+          done
+          installed="$(node -p "require('@pact-foundation/pact-cli-linux-x64/package.json').version")"
+          test "$installed" = "$VERSION"
+          npx --no-install pact --help

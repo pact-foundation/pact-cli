@@ -47,9 +47,10 @@ post-announce-jobs = [
   "./publish-containers",
   "./notify-homebrew",
   "./legacy-artifacts",
-  "./publish-pypi"
+  "./publish-pypi",
+  "./publish-npm"
 ]
-github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" }, legacy-artifacts = { contents = "write" }, publish-pypi = { contents = "read", id-token = "write" } }
+github-custom-job-permissions = { publish-containers = { contents = "read", packages = "write" }, legacy-artifacts = { contents = "write" }, publish-pypi = { contents = "read", id-token = "write" }, publish-npm = { contents = "read", id-token = "write" } }
 
 [[bin]]
 name = "pact"

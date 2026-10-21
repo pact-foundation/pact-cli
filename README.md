@@ -38,8 +38,9 @@ all download these same binaries.
 [`ring` arm64 Windows support](https://github.com/briansmith/ring/pull/2803)
 lands.
 
-The `pact-python-cli` wheel for Windows on arm64 carries the x86_64 binary,
-which runs under Windows' x64 emulation. Linux with glibc older than 2.34 has
+The `pact-python-cli` wheel and the `@pact-foundation/pact-cli` npm package
+for Windows on arm64 carry the x86_64 binary, which runs under Windows' x64
+emulation. Linux with glibc older than 2.34 has
 no matching wheel, so pip falls back to the Ruby-based `pact-python-cli`
 2.6.4.0; use the shell installer or the musl binary instead.
 
@@ -95,6 +96,26 @@ uv tool install pact-python-cli
 `pact-python-cli<1!0` to stay on them. The
 [Pact Python migration guide](https://github.com/pact-foundation/pact-python/blob/main/MIGRATION.md)
 maps each Ruby command to its `pact` subcommand.
+
+#### Node (npm)
+
+The [`@pact-foundation/pact-cli`](https://www.npmjs.com/package/@pact-foundation/pact-cli)
+package ships the same binaries as optional platform packages:
+
+```sh
+npm install --save-dev @pact-foundation/pact-cli
+npx pact --help
+```
+
+The package also installs `pact-broker`, `pact-mock-server`,
+`pact-stub-server`, `pact-plugin`, `pact-verifier` and `pactflow`. These are
+deprecated: each prints a notice and runs the matching `pact <command>`, and
+they will be removed in a future major release.
+
+Versions 17.x and earlier shipped a JavaScript API and the Ruby standalone
+tools; the
+[pact-js-cli migration guide](https://github.com/pact-foundation/pact-js-cli/blob/main/MIGRATION.md)
+covers the move to `pact`.
 
 ### Standalone executable
 
