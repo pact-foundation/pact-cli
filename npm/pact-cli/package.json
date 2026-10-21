@@ -1,0 +1,39 @@
+{
+  "name": "@pact-foundation/pact-cli",
+  "version": "0.0.0",
+  "description": "Pact CLI: mock server, verifier, stub server, plugin CLI and broker client",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pact-foundation/pact-cli.git"
+  },
+  "homepage": "https://github.com/pact-foundation/pact-cli#readme",
+  "bugs": {
+    "url": "https://github.com/pact-foundation/pact-cli/issues"
+  },
+  "bin": {
+    "pact": "bin/pact.js",
+    "pact-broker": "bin/pact-broker.js",
+    "pact-mock-server": "bin/pact-mock-server.js",
+    "pact-stub-server": "bin/pact-stub-server.js",
+    "pact-plugin": "bin/pact-plugin.js",
+    "pact-verifier": "bin/pact-verifier.js",
+    "pactflow": "bin/pactflow.js"
+  },
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=16"
+  }
+}

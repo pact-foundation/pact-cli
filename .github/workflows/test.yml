@@ -35,6 +35,7 @@ jobs:
       - format
       - lint
       - test
+      - npm
     steps:
       - name: Failed
         run: exit 1
@@ -88,3 +89,39 @@ jobs:
           tool: cargo-nextest
       - name: Run tests
         run: cargo nextest run
+
+  npm:
+    name: npm wrapper (${{ matrix.os }}, node ${{ matrix.node }})
+    if: >
+      github.event_name == 'push' ||
+      github.event.pull_request.draft == false
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '24'
+          - os: windows-latest
+            node: '24'
+          - os: ubuntu-latest
+            node: '16'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Run tests
+        if: matrix.node == '24'
+        run: node --test 'npm/test/*.test.js'
+      # node:test and fs.cpSync postdate Node 16, so the engines floor only
+      # checks that the wrapper loads and reports the missing platform package.
+      - name: Check wrapper on Node 16
+        if: matrix.node == '16'
+        shell: bash
+        run: |
+          status=0
+          node npm/pact-cli/bin/pact.js --version 2> stderr.txt || status=$?
+          cat stderr.txt
+          test "$status" -eq 1
+          grep -q '@pact-foundation/pact-cli-' stderr.txt
