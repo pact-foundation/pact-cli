@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.10] _2026-10-21_
+
+### 🚀 Features
+
+- Publish pact-python-cli to PyPI
+- Publish @pact-foundation/pact-cli to npm
+
+
 ## [0.10.9] _2026-10-14_
 
 ### 🧩 Bundled CLIs
