@@ -219,7 +219,7 @@ jobs:
             latest="$(.github/scripts/npm-view.sh "$name" dist-tags.latest)"
             tag="$(.github/scripts/npm-publish-tag.sh "$version" "$latest")"
             echo "Publishing $name@$version with tag $tag (latest was ${latest:-unset})"
-            npm publish "tarballs/$tarball" --access public --provenance --tag "$tag"
+            npm publish "./tarballs/$tarball" --access public --provenance --tag "$tag"
           done < tarballs/order.txt
 
   verify:
