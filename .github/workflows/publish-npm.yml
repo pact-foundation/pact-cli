@@ -90,7 +90,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         if: steps.version.outputs.enabled == 'true'
         with:
-          node-version: '24'
+          node-version: '26'
 
       - name: Build and pack
         if: steps.version.outputs.enabled == 'true'
@@ -148,7 +148,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
-          node-version: '24'
+          node-version: '26'
 
       # Installing the host's platform tarball alongside the main one satisfies
       # its optional dependency before anything is on the registry.
@@ -197,7 +197,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
-          node-version: '24'
+          node-version: '26'
           registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs npm 11.5.1 or later.
@@ -229,7 +229,7 @@ jobs:
     steps:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
-          node-version: '24'
+          node-version: '26'
 
       # The first check that goes through npm's own optionalDependencies
       # resolution. The registry can lag a publish by a few seconds.
