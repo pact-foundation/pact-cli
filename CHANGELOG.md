@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.10] _2026-11-03_
+
+### 🚀 Features
+
+- Publish pact-python-cli to PyPI
+- Publish @pact-foundation/pact-cli to npm
+
+### 🧩 Bundled CLIs
+
+- _(deps)_ Update rust crate pact_mock_server_cli to [v2.0.1](https://github.com/pact-foundation/pact-core-mock-server/releases/tag/pact_mock_server_cli-v2.0.1)
+
+
 ## [0.10.9] _2026-10-14_
 
 ### 🧩 Bundled CLIs
