@@ -17,9 +17,11 @@ runs:
     - name: Install pact (Unix)
       if: runner.os != 'Windows'
       shell: bash
+      env:
+        EXPLICIT_VERSION: ${{ inputs.version }}
+        ACTION_REF: ${{ github.action_ref }}
       run: |
-        EXPLICIT_VERSION="${{ inputs.version }}"
-        ACTION_REF="${{ github.action_ref }}"
+        set -euo pipefail
 
         if [ -n "$EXPLICIT_VERSION" ] && [ "$EXPLICIT_VERSION" != "vlatest" ]; then
           RESOLVED_VERSION="$EXPLICIT_VERSION"
@@ -30,11 +32,33 @@ runs:
         fi
 
         if [ -z "$RESOLVED_VERSION" ]; then
-          URL="https://github.com/pact-foundation/pact-cli/releases/latest/download/pact-installer.sh"
+          BASE_URL="https://github.com/pact-foundation/pact-cli/releases/latest/download"
         else
-          URL="https://github.com/pact-foundation/pact-cli/releases/download/${RESOLVED_VERSION}/pact-installer.sh"
+          BASE_URL="https://github.com/pact-foundation/pact-cli/releases/download/${RESOLVED_VERSION}"
         fi
-        curl --proto '=https' --tlsv1.2 -LsSf "$URL" | sh
+
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)  TARGET="x86_64-unknown-linux-gnu" ;;
+          Linux-aarch64|Linux-arm64) TARGET="aarch64-unknown-linux-gnu" ;;
+          Darwin-x86_64) TARGET="x86_64-apple-darwin" ;;
+          Darwin-arm64|Darwin-aarch64) TARGET="aarch64-apple-darwin" ;;
+          *) echo "Unsupported platform: $(uname -s)-$(uname -m)" >&2; exit 1 ;;
+        esac
+
+        # Download the release archive and verify it against its published
+        # checksum instead of piping an installer script into a shell.
+        WORK_DIR="$(mktemp -d)"
+        trap 'rm -rf "$WORK_DIR"' EXIT
+        ARCHIVE="pact-${TARGET}.tar.xz"
+        curl --proto '=https' --tlsv1.2 -fsSL -o "$WORK_DIR/$ARCHIVE" "$BASE_URL/$ARCHIVE"
+        curl --proto '=https' --tlsv1.2 -fsSL -o "$WORK_DIR/$ARCHIVE.sha256" "$BASE_URL/$ARCHIVE.sha256"
+        (cd "$WORK_DIR" && if command -v sha256sum >/dev/null 2>&1; then sha256sum --check --strict "$ARCHIVE.sha256"; else shasum -a 256 --check "$ARCHIVE.sha256"; fi)
+
+        INSTALL_DIR="$HOME/.local/bin"
+        mkdir -p "$INSTALL_DIR"
+        tar -xJf "$WORK_DIR/$ARCHIVE" -C "$WORK_DIR"
+        install -m 0755 "$WORK_DIR/pact-${TARGET}/pact" "$INSTALL_DIR/pact"
+        echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 
     - name: Install pact (Windows)
       if: runner.os == 'Windows'
