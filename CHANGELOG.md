@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.10] _2026-11-19_
+
+### 🚀 Features
+
+- Publish pact-python-cli to PyPI
+- Publish @pact-foundation/pact-cli to npm
+
+### 🧩 Bundled CLIs
+
+- _(deps)_ Update rust crate pact_mock_server_cli to [v2.0.1](https://github.com/pact-foundation/pact-core-mock-server/releases/tag/pact_mock_server_cli-v2.0.1)
+- _(deps)_ Update rust crate pact_verifier_cli to [v1.5.0](https://github.com/pact-foundation/pact-reference/releases/tag/pact_verifier_cli-v1.5.0)
+- _(deps)_ Update rust crate pact_mock_server_cli to [v2.0.2](https://github.com/pact-foundation/pact-core-mock-server/releases/tag/pact_mock_server_cli-v2.0.2)
+- _(deps)_ Update rust crate pact-broker-cli to [v0.9.2](https://github.com/pact-foundation/pact-broker-cli/releases/tag/v0.9.2)
+
+### 🧪 Testing
+
+- Assert traceparent continues pact's otel trace
+
+### 📦 Other
+
+- Notify homebrew-tap and scoop after a release, bump dist to 0.34.0
+
+
 ## [0.10.9] _2026-10-14_
 
 ### 🧩 Bundled CLIs
