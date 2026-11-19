@@ -87,7 +87,6 @@ opentelemetry-otlp = { version = "0.33.1", features = [
   "trace"
 ] }
 opentelemetry_sdk = "0.33.1"
-opentelemetry-semantic-conventions = "0.33.1"
 opentelemetry-stdout = { version = "0.33.1", features = ["logs", "trace"] }
 reqwest-tracing = { version = "0.7.1", features = [
   "opentelemetry_0_32",

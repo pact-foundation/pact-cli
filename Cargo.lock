@@ -2967,12 +2967,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "opentelemetry-semantic-conventions"
-version = "0.33.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a3cf639fefd3e852869114f9925b578da6dd8e99281a2089bb0e773ead46962"
-
-[[package]]
 name = "opentelemetry-stdout"
 version = "0.33.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3046,7 +3040,6 @@ dependencies = [
  "opentelemetry-appender-tracing",
  "opentelemetry-http",
  "opentelemetry-otlp",
- "opentelemetry-semantic-conventions",
  "opentelemetry-stdout",
  "opentelemetry_sdk",
  "pact-broker-cli",
