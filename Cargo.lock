@@ -3105,7 +3105,7 @@ dependencies = [
 
 [[package]]
 name = "pact"
-version = "0.10.10"
+version = "1.0.0"
 dependencies = [
  "clap",
  "clap_complete",
