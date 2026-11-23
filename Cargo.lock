@@ -3407,9 +3407,9 @@ dependencies = [
 
 [[package]]
 name = "pact_verifier_cli"
-version = "1.5.0"
+version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70955d438c67d60f0e0f303e53ba0af4edaac278ae8ddc62f4c32269088db9c1"
+checksum = "211118d7da308481f01dfa8a5ddc3b109fad9f9ef84f43e57365a4e3492a6acb"
 dependencies = [
  "ansi_term",
  "anyhow",
@@ -3785,9 +3785,9 @@ dependencies = [
 
 [[package]]
 name = "qualname"
-version = "0.0.1"
+version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7ca141ff6dd6af1bf241aa43eac7491d69c9be5059574708495e61948ab4bac"
+checksum = "5b7e17688d7e871b907a1d869d01a72e13da2f235e47edd88e003610f26ec7a8"
 
 [[package]]
 name = "quick-xml"
@@ -6149,9 +6149,9 @@ dependencies = [
 
 [[package]]
 name = "xrust"
-version = "2.2.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fb2c761645855d610598e85a199f9e86f805cf6d0d526b26cfedf38582b299f"
+checksum = "11e0eacb58c190372d2d26a8716969b53e72ef30e8769748c8cb989cb874a3cd"
 dependencies = [
  "chrono",
  "english-numbers",
