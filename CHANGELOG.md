@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] _2026-11-23_
+
+### 🐛 Bug Fixes
+
+- Publish PyPI and npm from top-level runs
+
+### 🧩 Bundled CLIs
+
+- _(deps)_ Update rust crate pact-broker-cli to [v1.0.0](https://github.com/pact-foundation/pact-broker-cli/releases/tag/v1.0.0) ([#209](https://github.com/pact-foundation/pact-cli/issues/209))
+- _(deps)_ Update rust crate pact_verifier_cli to [v1.5.1](https://github.com/pact-foundation/pact-reference/releases/tag/pact_verifier_cli-v1.5.1) ([#214](https://github.com/pact-foundation/pact-cli/issues/214))
+
+
 ## [0.10.10] _2026-11-19_
 
 ### 🚀 Features
