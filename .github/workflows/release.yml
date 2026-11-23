@@ -327,26 +327,13 @@ jobs:
     permissions:
       "contents": "write"
 
-  custom-publish-pypi:
+  custom-dispatch-publish:
     needs:
       - plan
       - announce
-    uses: $/.github/workflows/publish-pypi.yml
+    uses: $/.github/workflows/dispatch-publish.yml
     with:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit
     permissions:
-      "contents": "read"
-      "id-token": "write"
-
-  custom-publish-npm:
-    needs:
-      - plan
-      - announce
-    uses: $/.github/workflows/publish-npm.yml
-    with:
-      plan: ${{ needs.plan.outputs.val }}
-    secrets: inherit
-    permissions:
-      "contents": "read"
-      "id-token": "write"
+      "actions": "write"

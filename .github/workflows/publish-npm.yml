@@ -4,9 +4,8 @@
 # Versions map crate `X.Y.Z` to npm `(18+X).Y.Z`; 18.x continues the
 # pact-js-cli line.
 #
-# npm trusted publishing must list both release.yml (which calls this
-# workflow) and publish-npm.yml (for manual runs), with environment `npm`, on
-# all seven packages.
+# release.yml starts this workflow through dispatch-publish.yml. npm trusted
+# publishing lists publish-npm.yml with environment `npm` on all seven packages.
 
 name: Publish npm
 
@@ -14,11 +13,6 @@ permissions:
   contents: read
 
 on:
-  workflow_call:
-    inputs:
-      plan:
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -39,19 +33,10 @@ jobs:
       - name: Resolve version
         id: version
         env:
-          PLAN: ${{ inputs.plan }}
-          MANUAL_TAG: ${{ inputs.tag }}
+          TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          if [[ -n "$PLAN" ]]; then
-            TAG="$(echo "$PLAN" | jq -r '.announcement_tag')"
-            PRERELEASE="$(echo "$PLAN" | jq -r '.announcement_is_prerelease')"
-          else
-            TAG="$MANUAL_TAG"
-            PRERELEASE=false
-          fi
-
-          if [[ "$PRERELEASE" == "true" || "$TAG" == *-* ]]; then
+          if [[ "$TAG" == *-* ]]; then
             echo "::notice::Skipping npm publish for prerelease ${TAG}"
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             exit 0

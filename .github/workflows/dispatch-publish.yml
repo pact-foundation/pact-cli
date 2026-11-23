@@ -1,0 +1,40 @@
+name: Dispatch publish
+
+# Starts publish-pypi.yml and publish-npm.yml as top-level runs at the release
+# tag. PyPI trusted publishing does not support reusable workflows, so the
+# publish jobs cannot run inside release.yml. GITHUB_TOKEN can trigger
+# workflow_dispatch, unlike the release event it creates.
+on:
+  workflow_call:
+    inputs:
+      plan:
+        description: dist plan JSON (dist post-announce jobs pass this)
+        required: true
+        type: string
+
+permissions:
+  actions: write
+
+jobs:
+  dispatch:
+    name: Dispatch ${{ matrix.workflow }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    strategy:
+      fail-fast: false
+      matrix:
+        workflow:
+          - publish-pypi.yml
+          - publish-npm.yml
+    steps:
+      - name: Dispatch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLAN: ${{ inputs.plan }}
+          WORKFLOW: ${{ matrix.workflow }}
+        run: |
+          set -euo pipefail
+          TAG="$(jq -r '.announcement_tag' <<< "$PLAN")"
+          gh workflow run "$WORKFLOW" --repo "$GITHUB_REPOSITORY" --ref "$TAG" -f tag="$TAG"
+          echo "::notice::Dispatched $WORKFLOW for $TAG"

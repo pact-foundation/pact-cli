@@ -5,8 +5,8 @@
 # 2.x releases, which shipped the Ruby standalone tools from
 # pact-foundation/pact-python.
 #
-# PyPI trusted publishing must list both release.yml (which calls this
-# workflow) and publish-pypi.yml (for manual runs), with environment `pypi`.
+# release.yml starts this workflow through dispatch-publish.yml. PyPI trusted
+# publishing lists publish-pypi.yml with environment `pypi`.
 
 name: Publish PyPI
 
@@ -14,11 +14,6 @@ permissions:
   contents: read
 
 on:
-  workflow_call:
-    inputs:
-      plan:
-        required: true
-        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -42,20 +37,11 @@ jobs:
       - name: Resolve version
         id: version
         env:
-          PLAN: ${{ inputs.plan }}
-          MANUAL_TAG: ${{ inputs.tag }}
+          TAG: ${{ inputs.tag }}
           POST: ${{ inputs.post }}
         run: |
           set -euo pipefail
-          if [[ -n "$PLAN" ]]; then
-            TAG="$(echo "$PLAN" | jq -r '.announcement_tag')"
-            PRERELEASE="$(echo "$PLAN" | jq -r '.announcement_is_prerelease')"
-          else
-            TAG="$MANUAL_TAG"
-            PRERELEASE=false
-          fi
-
-          if [[ "$PRERELEASE" == "true" || "$TAG" == *-* ]]; then
+          if [[ "$TAG" == *-* ]]; then
             echo "::notice::Skipping PyPI publish for prerelease ${TAG}"
             echo "enabled=false" >> "$GITHUB_OUTPUT"
             exit 0
