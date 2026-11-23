@@ -344,6 +344,8 @@ Usage: pact pactflow [OPTIONS] [COMMAND]
 
 Commands:
   publish-provider-contract  Publish provider contract to PactFlow
+  delete-provider-contract   Delete one provider contract of a provider version from PactFlow
+  list-provider-contracts    List the provider contracts of a provider version in PactFlow
   help                       Print this message or the help of the given subcommand(s)
 
 Options:
